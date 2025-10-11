@@ -1,6 +1,20 @@
 @import "tailwindcss";
 
 :root {
+  /* University of Minnesota brand palette */
+  --umn-maroon: #7a0019;   /* official UMN maroon */
+  --umn-maroon-600: #5b0013; /* hover */
+  --umn-gold:   #ffcc33;   /* official UMN gold  */
+  --umn-maroon-ink: #5b0013;   /* dark maroon (for text on light) */
+  --umn-gold-dark:  #ffb71e;   /* darker gold for borders/hover */
+
+  /* Neutrals for a light UI like your mock-up */
+  --surface:   #f2f3f5;         /* page background */
+  --panel: #ffffff;         /* cards/panels */
+  --ink:  #111111;         /* default text */
+  --muted: #6b7280;         /* secondary text */
+  --line: #e5e7eb;         /* borders */
+
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
