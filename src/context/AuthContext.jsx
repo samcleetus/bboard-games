@@ -1,4 +1,4 @@
-import {createContext, useState, useEffect, useContext, use} from 'react';
+import {createContext, useState, useEffect, useContext} from 'react';
 import { supabase } from '../supabaseClient';
 
 const AuthContext = createContext()
@@ -6,82 +6,114 @@ const AuthContext = createContext()
 export const AuthContextProvider = ({children}) => {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [userProfile, setUserProfile] = useState(null)
 
-
-
-    // Sign Up 
-    const signUpNewUser = async (email, password, username) => {
-        const {data, error} = await supabase.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                data: {
-                    username: username
-                }
-            }
-        })
-
-        if (error) {
-            console.error("Error signing up: ", error);
-            return { success: false, error };
-        }
-        return { success: true, data };
-    } // Close signUpNewUser
-
-    // Sign In
-    const signInUser = async( email, password ) => {
-        try {
-            const { data, error} = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password
-            })
-            if (error) {
-                console.error("Error signing in: ", error);
-                return { success: false, error: error.message };
-            }
-            console.log("Sign-in successful: ", data);
-            return { success: true, data };
-        } catch(error) {
-            console.error("Error signing in: ", error);
-            return { success: false, error: error.message };
-        }
+  // Fetch user profile data
+  const fetchUserProfile = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) throw error;
+      setUserProfile(data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return null;
     }
+  };
 
-
-   useEffect(() => { 
-       supabase.auth.getSession().then(({ data: { session } }) => {
-           setSession(session)
-           setLoading(false)
-       })
-
-       const {
-           data: { subscription },
-       } = supabase.auth.onAuthStateChange((_event, session) => {
-           setSession(session)
-           setLoading(false)
-       })
-
-       return () => subscription.unsubscribe()
-   }, []);
-
-   if (loading) {
-       return <div>Loading...</div>
-   }
-
-   // Sign Out
-   const signOut = () => {
-        const { error } = supabase.auth.signOut()
-        if (error) {
-            console.error("Error signing out: ", error);
+  // Sign Up 
+  const signUpNewUser = async (email, password, username) => {
+    const {data, error} = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: {
+          username: username
         }
-   }
+      }
+    })
 
+    if (error) {
+      console.error("Error signing up: ", error);
+      return { success: false, error };
+    }
+    return { success: true, data };
+  }
 
-    return (
-      <AuthContext.Provider value={{ session, signUpNewUser, signInUser, signOut }}>
-        {children}
-      </AuthContext.Provider>
-    )
+  // Sign In
+  const signInUser = async (email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      })
+      if (error) {
+        console.error("Error signing in: ", error);
+        return { success: false, error: error.message };
+      }
+      console.log("Sign-in successful: ", data);
+      return { success: true, data };
+    } catch (error) {
+      console.error("Error signing in: ", error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Sign Out
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      console.error("Error signing out: ", error);
+    } else {
+      setUserProfile(null);
+    }
+  }
+
+  useEffect(() => { 
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      if (session?.user?.id) {
+        fetchUserProfile(session.user.id);
+      }
+      setLoading(false)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      if (session?.user?.id) {
+        fetchUserProfile(session.user.id);
+      } else {
+        setUserProfile(null);
+      }
+      setLoading(false)
+    })
+
+    return () => subscription.unsubscribe()
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  return (
+    <AuthContext.Provider value={{ 
+      session, 
+      userProfile, 
+      signUpNewUser, 
+      signInUser, 
+      signOut, 
+      fetchUserProfile 
+    }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export const UserAuth = () => {
