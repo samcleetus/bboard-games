@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+# Note: .env.production is NOT in this list, so it will be included
+.nyc_output
+coverage
+.cache
+.vscode
+.idea
+dist
+.DS_Store

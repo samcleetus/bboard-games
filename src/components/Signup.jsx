@@ -149,7 +149,7 @@ const Signup = () => {
                                     e.target.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.1)';
                                 }}
                                 type="email" 
-                                placeholder="Enter your email"
+                                placeholder="Enter your personal email"
                                 required
                             />
                         </div>

@@ -1,0 +1,18 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/assets/*",
+      "/images/*", 
+      "/css/*",
+      "/js/*",
+      "*.{css,js,png,jpg,jpeg,gif,svg,ico,woff,woff2,ttf,eot,json}"
+    ]
+  },
+  "globalHeaders": {
+    "content-security-policy": "default-src 'self' https://*.supabase.co; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co;"
+  },
+  "mimeTypes": {
+    ".json": "application/json"
+  }
+}
