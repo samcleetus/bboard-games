@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { UserAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
+import words from 'an-array-of-english-words';
 
 const Boardle = () => {
   const { session, userProfile, fetchUserProfile } = UserAuth();
@@ -22,118 +23,142 @@ const Boardle = () => {
   // Reference for the input field
   const inputRef = useRef(null);
 
-  // Target words - 300+ words for daily play (mix of UMN/business terms and accessible general words)
-  const TARGET_WORDS = [
-    // UMN & Minnesota specific terms
-    'GOPHER', 'MINNE', 'TWINS', 'NORTH', 'LAKES', 'STATE', 'MAYOR', 'RIVER', 'GRAIN', 'FLOUR',
-    'BREAD', 'MILLS', 'FALLS', 'STONE', 'BRIDGE', 'AVENUE', 'GRAND', 'SAINT', 'PARKS', 'WOODS',
+  // Memoize word lists for optimal performance
+  const { VALID_GUESSES, TARGET_WORDS, isValidWord } = useMemo(() => {
+    console.log('🔄 Calculating word lists...');
     
-    // Business & Finance terms (accessible level)
-    'MONEY', 'TRADE', 'SALES', 'PRICE', 'VALUE', 'GOODS', 'STORE', 'BUYER', 'ORDER', 'STOCK',
-    'BONDS', 'FUNDS', 'BANKS', 'LOANS', 'TAXES', 'BILLS', 'COSTS', 'PROFIT', 'GAINS', 'WAGES',
-    'SPEND', 'SAVED', 'OWNED', 'DEALS', 'OFFER', 'BRAND', 'LOGOS', 'NAMES', 'SIGNS', 'MARKS',
-    'SHOPS', 'MALL', 'PLAZA', 'CHAIN', 'FORMS', 'TERMS', 'RULES', 'LEGAL', 'COURT', 'JUDGE',
-    'BOARD', 'CHAIR', 'CHIEF', 'STAFF', 'TEAMS', 'GROUP', 'UNITY', 'GOALS', 'PLANS', 'IDEAS',
-    'FOCUS', 'GUIDE', 'TEACH', 'LEARN', 'STUDY', 'BOOKS', 'PAGES', 'WORDS', 'TESTS', 'GRADE',
-    'SKILL', 'SMART', 'THINK', 'SOLVE', 'BUILD', 'MAKES', 'WORKS', 'DOING', 'TASKS', 'JOBS',
-    
-    // Common, accessible 5-letter words (easy level for freshmen)
-    'ABOUT', 'ABOVE', 'AFTER', 'AGAIN', 'AGREE', 'AHEAD', 'ALONE', 'ALONG', 'AMONG', 'ANGRY',
-    'APPLE', 'APPLY', 'AREAS', 'ARMED', 'ARROW', 'ASIDE', 'ASKED', 'AVOID', 'AWAKE', 'AWARD',
-    'AWARE', 'BADLY', 'BASIC', 'BEACH', 'BEGAN', 'BEGIN', 'BEING', 'BELOW', 'BENCH', 'BIKES',
-    'BIRTH', 'BLACK', 'BLANK', 'BLIND', 'BLOCK', 'BLOOD', 'BLUES', 'BOATS', 'BOOKS', 'BORN',
-    'BOXES', 'BOYS', 'BREAD', 'BREAK', 'BRING', 'BROAD', 'BROKE', 'BROWN', 'BUILD', 'BUILT',
-    'BUSES', 'BUYER', 'CALLS', 'CARDS', 'CARRY', 'CASES', 'CATCH', 'CAUSE', 'CHAIN', 'CHAIR',
-    'CHART', 'CHASE', 'CHEAP', 'CHECK', 'CHEST', 'CHILD', 'CHINA', 'CHOSE', 'CIVIL', 'CLAIM',
-    'CLASS', 'CLEAN', 'CLEAR', 'CLICK', 'CLIMB', 'CLOCK', 'CLOSE', 'CLOUD', 'CLUBS', 'COACH',
-    'COAST', 'COINS', 'COLOR', 'COMES', 'COOL', 'CORAL', 'COSTS', 'COULD', 'COUNT', 'COURT',
-    'COVER', 'CRAFT', 'CRASH', 'CRAZY', 'CREAM', 'CRIME', 'CROPS', 'CROSS', 'CROWD', 'CROWN',
-    'CURVE', 'CYCLE', 'DAILY', 'DANCE', 'DATED', 'DEALS', 'DEATH', 'DELAY', 'DEPTH', 'DESKS',
-    'DOING', 'DOORS', 'DOUBT', 'DOZEN', 'DRAFT', 'DRAMA', 'DRANK', 'DRAWN', 'DREAM', 'DRESS',
-    'DRILL', 'DRINK', 'DRIVE', 'DROVE', 'DRUGS', 'DRUNK', 'DYING', 'EAGER', 'EARLY', 'EARTH',
-    'EIGHT', 'ELECT', 'ELITE', 'EMPTY', 'ENEMY', 'ENJOY', 'ENTER', 'ENTRY', 'EQUAL', 'ERROR',
-    'EVENT', 'EVERY', 'EXACT', 'EXIST', 'EXTRA', 'FACES', 'FACTS', 'FAITH', 'FALSE', 'FARMS',
-    'FAULT', 'FEELS', 'FIELD', 'FIFTH', 'FIFTY', 'FIGHT', 'FILED', 'FILLS', 'FILMS', 'FINAL',
-    'FINDS', 'FIRED', 'FIRST', 'FIXED', 'FLAGS', 'FLASH', 'FLEET', 'FLOOR', 'FLOWS', 'FOCUS',
-    'FOODS', 'FORCE', 'FORMS', 'FORTH', 'FORTY', 'FORUM', 'FOUND', 'FRAME', 'FRESH', 'FRONT',
-    'FRUIT', 'FULLY', 'FUNNY', 'GAMES', 'GATES', 'GETS', 'GIANT', 'GIFTS', 'GIRLS', 'GIVEN',
-    'GIVES', 'GLASS', 'GLOBE', 'GOALS', 'GOING', 'GOODS', 'GRACE', 'GRADE', 'GRAND', 'GRANT',
-    'GRASS', 'GRAVE', 'GREAT', 'GREEN', 'GROSS', 'GROUP', 'GROWN', 'GROWS', 'GUARD', 'GUESS',
-    'GUEST', 'GUIDE', 'HANDS', 'HAPPY', 'HARRY', 'HEADS', 'HEARD', 'HEART', 'HEAVY', 'HELPS',
-    'HENRY', 'HILLS', 'HOLDS', 'HOMES', 'HONOR', 'HOPED', 'HORSE', 'HOTEL', 'HOURS', 'HOUSE',
-    'HUMAN', 'HUMOR', 'HURRY', 'IDEAS', 'IDEAL', 'IMAGE', 'INDEX', 'INNER', 'INPUT', 'ITEMS',
-    'JAPAN', 'JOINS', 'JONES', 'JUDGE', 'KEEPS', 'KILLS', 'KINDS', 'KINGS', 'KNOWS', 'LANDS',
-    'LARGE', 'LATER', 'LAUGH', 'LAYER', 'LEADS', 'LEARN', 'LEAST', 'LEAVE', 'LEGAL', 'LEVEL',
-    'LEWIS', 'LIGHT', 'LIKED', 'LIKES', 'LIMIT', 'LINES', 'LINKS', 'LISTS', 'LIVED', 'LIVES',
-    'LOCAL', 'LOOKS', 'LOOSE', 'LOVED', 'LOVES', 'LOWER', 'LUCKY', 'LUNCH', 'MAGIC', 'MAJOR',
-    'MAKES', 'MARCH', 'MATCH', 'MAYBE', 'MAYOR', 'MEALS', 'MEANS', 'MEANT', 'MEDIA', 'MEETS',
-    'METAL', 'MIGHT', 'MILES', 'MINDS', 'MINOR', 'MIXED', 'MODEL', 'MONEY', 'MONTH', 'MORAL',
-    'MOUSE', 'MOUTH', 'MOVED', 'MOVES', 'MOVIE', 'MUSIC', 'NEEDS', 'NEVER', 'NIGHT', 'NOISE',
-    'NORTH', 'NOTED', 'NOTES', 'NURSE', 'OCCUR', 'OCEAN', 'OFFER', 'OFTEN', 'OLDER', 'OPENS',
-    'ORDER', 'OTHER', 'OUGHT', 'OWNED', 'OWNER', 'PAGES', 'PANEL', 'PAPER', 'PARTS', 'PARTY',
-    'PEACE', 'PHONE', 'PHOTO', 'PIANO', 'PICKS', 'PIECE', 'PILOT', 'PITCH', 'PLACE', 'PLAIN',
-    'PLANE', 'PLANS', 'PLANT', 'PLATE', 'PLAYS', 'PLAZA', 'POINT', 'POUND', 'POWER', 'PRESS',
-    'PRICE', 'PRIDE', 'PRIME', 'PRINT', 'PRIOR', 'PRIZE', 'PROOF', 'PROUD', 'PROVE', 'PULLS',
-    'QUICK', 'QUIET', 'QUITE', 'RADIO', 'RAISE', 'RANGE', 'RAPID', 'RATES', 'REACH', 'READS',
-    'READY', 'REALM', 'REBEL', 'REFER', 'RELAX', 'REPLY', 'RIGHT', 'RINGS', 'RISES', 'RISKS',
-    'RIVER', 'ROADS', 'ROBOT', 'ROLES', 'ROLLS', 'ROOMS', 'ROOTS', 'ROUGH', 'ROUND', 'ROUTE',
-    'ROWS', 'ROYAL', 'RULES', 'RURAL', 'SAFER', 'SALES', 'SCALE', 'SCARY', 'SCENE', 'SCOPE',
-    'SCORE', 'SEATS', 'SEEMS', 'SELLS', 'SENSE', 'SERVE', 'SEVEN', 'SHALL', 'SHAPE', 'SHARE',
-    'SHARP', 'SHEET', 'SHELF', 'SHELL', 'SHIFT', 'SHINE', 'SHIRT', 'SHOCK', 'SHOES', 'SHOOT',
-    'SHOPS', 'SHORT', 'SHOTS', 'SHOWS', 'SIDES', 'SIGHT', 'SIGNS', 'SILLY', 'SINCE', 'SITES',
-    'SIXTH', 'SIZES', 'SKILL', 'SLEEP', 'SLIDE', 'SMALL', 'SMART', 'SMILE', 'SMOKE', 'SNAKE',
-    'SNOW', 'SOLAR', 'SOLID', 'SOLVE', 'SONGS', 'SORRY', 'SORTS', 'SOUND', 'SOUTH', 'SPACE',
-    'SPARE', 'SPEAK', 'SPEED', 'SPEND', 'SPENT', 'SPLIT', 'SPOKE', 'SPORT', 'SPOTS', 'STAFF',
-    'STAGE', 'STAKE', 'STAMP', 'STAND', 'STARS', 'START', 'STAYS', 'STEAL', 'STEAM', 'STEEL',
-    'STEPS', 'STICK', 'STILL', 'STOCK', 'STONE', 'STOOD', 'STOPS', 'STORE', 'STORM', 'STORY',
-    'STRIP', 'STUCK', 'STUDY', 'STUFF', 'STYLE', 'SUGAR', 'SUITE', 'SUPER', 'SWEET', 'SWING',
-    'TABLE', 'TAKEN', 'TAKES', 'TALKS', 'TANKS', 'TAPES', 'TASKS', 'TASTE', 'TAXES', 'TEACH',
-    'TEAMS', 'TELLS', 'TERMS', 'TESTS', 'TEXTS', 'THANK', 'THEFT', 'THEIR', 'THEME', 'THERE',
-    'THESE', 'THICK', 'THING', 'THINK', 'THIRD', 'THOSE', 'THREE', 'THREW', 'THROW', 'THUMB',
-    'TIGHT', 'TIMES', 'TIRED', 'TITLE', 'TODAY', 'TOKEN', 'TOOLS', 'TOOTH', 'TOPS', 'TOTAL',
-    'TOUCH', 'TOUGH', 'TOURS', 'TOWER', 'TOWNS', 'TRACK', 'TRADE', 'TRAIN', 'TREAT', 'TREES',
-    'TREND', 'TRIAL', 'TRIBE', 'TRICK', 'TRIED', 'TRIES', 'TRIPS', 'TRUCK', 'TRULY', 'TRUST',
-    'TRUTH', 'TUBES', 'TURNS', 'TWICE', 'TYPES', 'UNCLE', 'UNDER', 'UNION', 'UNITS', 'UNITY',
-    'UNTIL', 'UPPER', 'URBAN', 'URGED', 'USAGE', 'USERS', 'USES', 'USUAL', 'VALUE', 'VIDEO',
-    'VIEWS', 'VIRUS', 'VISIT', 'VITAL', 'VOICE', 'VOTES', 'WAGES', 'WAITS', 'WALKS', 'WALLS',
-    'WANTS', 'WATCH', 'WATER', 'WAVES', 'WEEKS', 'WEIRD', 'WELLS', 'WHAT', 'WHERE', 'WHICH',
-    'WHILE', 'WHITE', 'WHOLE', 'WHOSE', 'WIDE', 'WINDS', 'WINES', 'WINGS', 'WINS', 'WOMAN',
-    'WOMEN', 'WORDS', 'WORKS', 'WORLD', 'WORRY', 'WORSE', 'WORST', 'WORTH', 'WOULD', 'WRITE',
-    'WRONG', 'WROTE', 'YARDS', 'YEARS', 'YOUNG', 'YOURS', 'YOUTH', 'ZONES'
-  ];
+    // Business & UMN specific words for target selection
+    const BUSINESS_WORDS = [
+      // UMN & Minnesota specific terms
+      'GOPHER', 'MINNE', 'TWINS', 'NORTH', 'LAKES', 'STATE', 'MAYOR', 'RIVER', 'GRAIN', 'FLOUR',
+      'BREAD', 'MILLS', 'FALLS', 'STONE', 'BRIDGE', 'AVENUE', 'GRAND', 'SAINT', 'PARKS', 'WOODS',
+      
+      // Business & Finance terms (accessible level)
+      'MONEY', 'TRADE', 'SALES', 'PRICE', 'VALUE', 'GOODS', 'STORE', 'BUYER', 'ORDER', 'STOCK',
+      'BONDS', 'FUNDS', 'BANKS', 'LOANS', 'TAXES', 'BILLS', 'COSTS', 'PROFIT', 'GAINS', 'WAGES',
+      'SPEND', 'SAVED', 'OWNED', 'DEALS', 'OFFER', 'BRAND', 'LOGOS', 'NAMES', 'SIGNS', 'MARKS',
+      'SHOPS', 'MALL', 'PLAZA', 'CHAIN', 'FORMS', 'TERMS', 'RULES', 'LEGAL', 'COURT', 'JUDGE',
+      'BOARD', 'CHAIR', 'CHIEF', 'STAFF', 'TEAMS', 'GROUP', 'UNITY', 'GOALS', 'PLANS', 'IDEAS',
+      'FOCUS', 'GUIDE', 'TEACH', 'LEARN', 'STUDY', 'BOOKS', 'PAGES', 'WORDS', 'TESTS', 'GRADE',
+      'SKILL', 'SMART', 'THINK', 'SOLVE', 'BUILD', 'MAKES', 'WORKS', 'DOING', 'TASKS', 'JOBS',
+      
+      // Additional common business terms
+      'ADMIN', 'AGENT', 'APPLY', 'ASSET', 'AUDIT', 'AWARD', 'BONUS', 'BRIEF',
+      'CHART', 'CHECK', 'CLAIM', 'CLASS', 'CLICK', 'COACH', 'COUNT', 'COVER', 'CRAFT',
+      'CYCLE', 'DAILY', 'DEALT', 'DEBUT', 'DEPTH', 'DRAFT', 'DREAM', 'DRIVE', 'EMAIL', 'ENTRY',
+      'ERROR', 'EVENT', 'EXACT', 'EXCEL', 'FIELD', 'FINAL', 'FIRST', 'FIXED', 'FLOOR',
+      'FORCE', 'FORUM', 'FOUND', 'FRAME', 'FRONT', 'GIANT', 'GIVEN', 'GRACE', 'GRADE', 'GRAND',
+      'GRANT', 'GROSS', 'GROWN', 'GUARD', 'HAPPY', 'HEART', 'HOUSE', 'HUMAN',
+      'IDEAL', 'IMAGE', 'INDEX', 'INNER', 'INPUT', 'ISSUE', 'ITEMS', 'JOINT', 'KNOWN',
+      'LABEL', 'LARGE', 'LASER', 'LATER', 'LAYER', 'LEASE', 'LEAST', 'LEAVE',
+      'LEVEL', 'LIGHT', 'LIMIT', 'LINKS', 'LOCAL', 'LOGIC', 'LOWER', 'LUCKY', 'MAGIC', 'MAJOR',
+      'MAKER', 'MARCH', 'MATCH', 'MAYBE', 'MEANT', 'MEDAL', 'MEDIA', 'METAL', 'MIGHT', 'MINOR',
+      'MIXED', 'MODEL', 'MONTH', 'MORAL', 'MOTOR', 'MOUNT', 'MOVED', 'MUSIC', 'NEEDS', 'NEVER',
+      'NEWLY', 'NIGHT', 'NOISE', 'NOTED', 'NOVEL', 'OCCUR', 'OCEAN', 'OFTEN',
+      'OTHER', 'OUGHT', 'OWNER', 'PANEL', 'PAPER', 'PARTS', 'PARTY', 'PEACE', 'PHASE',
+      'PHONE', 'PHOTO', 'PIANO', 'PIECE', 'PILOT', 'PITCH', 'PLACE', 'PLAIN', 'PLANE', 'PLANT',
+      'PLATE', 'POINT', 'POUND', 'POWER', 'PRESS', 'PRIDE', 'PRIME', 'PRINT', 'PRIOR', 'PRIZE',
+      'PROOF', 'PROUD', 'PROVE', 'QUEEN', 'QUICK', 'QUIET', 'QUITE', 'RADIO', 'RAISE', 'RANGE',
+      'RAPID', 'RATIO', 'REACH', 'READY', 'REALM', 'REBEL', 'REFER', 'RELAX', 'RIGHT', 'RIGID',
+      'RIVAL', 'ROBIN', 'ROGER', 'ROMAN', 'ROUGH', 'ROUND', 'ROUTE', 'ROYAL', 'RURAL', 'SCALE',
+      'SCENE', 'SCOPE', 'SCORE', 'SENSE', 'SERVE', 'SEVEN', 'SHALL', 'SHAPE', 'SHARE', 'SHARP',
+      'SHEET', 'SHELF', 'SHELL', 'SHINE', 'SHIRT', 'SHOCK', 'SHOOT', 'SHORT', 'SHOWN', 'SIGHT',
+      'SILLY', 'SINCE', 'SIXTH', 'SIXTY', 'SIZED', 'SLEEP', 'SLIDE', 'SMALL',
+      'SMILE', 'SMITH', 'SMOKE', 'SOLID', 'SOLVE', 'SORRY', 'SOUND', 'SOUTH', 'SPACE', 'SPARE',
+      'SPEAK', 'SPEED', 'SPENT', 'SPLIT', 'SPOKE', 'SPORT', 'STAGE', 'STAKE', 'STAND',
+      'START', 'STEAM', 'STEEL', 'STEEP', 'STICK', 'STILL', 'STONE', 'STOOD',
+      'STORM', 'STORY', 'STRIP', 'STUCK', 'STUFF', 'STYLE', 'SUGAR', 'SUITE', 'SUPER',
+      'SWEET', 'TABLE', 'TAKEN', 'TASTE', 'TEENS', 'TEETH', 'TERRY', 'TEXAS', 'THANK',
+      'THEFT', 'THEIR', 'THEME', 'THERE', 'THESE', 'THICK', 'THING', 'THIRD', 'THOSE',
+      'THREE', 'THREW', 'THROW', 'THUMB', 'TIGER', 'TIGHT', 'TIRED', 'TODAY', 'TOKEN',
+      'TOPIC', 'TOTAL', 'TOUCH', 'TOUGH', 'TOWER', 'TRACK', 'TRAIN', 'TRAIT', 'TREAT', 'TREND',
+      'TRIAL', 'TRIBE', 'TRICK', 'TRIED', 'TRIES', 'TRUCK', 'TRULY', 'TRUNK', 'TRUST', 'TRUTH',
+      'TWICE', 'TWIST', 'TYLER', 'UNDER', 'UNDUE', 'UNION', 'UNITY', 'UNTIL', 'UPPER', 'UPSET',
+      'URBAN', 'USAGE', 'USUAL', 'VIDEO', 'VIRUS', 'VISIT', 'VITAL', 'VOCAL', 'VOICE', 'WASTE',
+      'WATCH', 'WATER', 'WHEEL', 'WHERE', 'WHICH', 'WHILE', 'WHITE', 'WHOLE', 'WHOSE', 'WOMAN',
+      'WOMEN', 'WORLD', 'WORRY', 'WORSE', 'WORST', 'WORTH', 'WOULD', 'WRITE', 'WRONG', 'WROTE',
+      'YOUNG', 'YOUTH'
+    ];
 
-  // All acceptable guess words (includes target words + many more common words)
-  const VALID_GUESSES = [
-    ...TARGET_WORDS, // Include all target words first
-    
-    // Comprehensive 5-letter English words for guessing (~3,000+ additional words)
-    'AAHED', 'AALII', 'AARGH', 'ABACA', 'ABACI', 'ABACK', 'ABAFT', 'ABAKA', 'ABAMP', 'ABASE',
-    'ABASH', 'ABATE', 'ABBEY', 'ABBOT', 'ABEAM', 'ABELE', 'ABETS', 'ABHOR', 'ABIDE', 'ABLED',
-    'ABLER', 'ABLES', 'ABMHO', 'ABODE', 'ABOHM', 'ABOIL', 'ABOMA', 'ABOON', 'ABORT', 'ABOUT',
-    'ABOVE', 'ABUSE', 'ABUTS', 'ABUZZ', 'ABYES', 'ABYSM', 'ABYSS', 'ACARI', 'ACCOY', 'ACHED',
-    'ACHES', 'ACHOO', 'ACIDS', 'ACIDY', 'ACING', 'ACINI', 'ACKEE', 'ACMES', 'ACNED', 'ACNES',
-    'ACORN', 'ACRES', 'ACRID', 'ACTED', 'ACTIN', 'ACTOR', 'ACUTE', 'ADAGE', 'ADAPT', 'ADDAX',
-    'ADDED', 'ADDER', 'ADDLE', 'ADEEM', 'ADEPT', 'ADIEU', 'ADIOS', 'ADITS', 'ADMAN', 'ADMIN',
-    'ADMIT', 'ADMIX', 'ADOBE', 'ADOBO', 'ADOPT', 'ADORE', 'ADORN', 'ADOWN', 'ADULT', 'ADUNC',
-    'ADZES', 'AECIA', 'AEDES', 'AEGIS', 'AEONS', 'AEROS', 'AFIRE', 'AFORE', 'AFOUL', 'AFRIT'
-    // ... (truncating for brevity - in the full implementation, you'd include thousands more words)
-  ];
+    // Common, recognizable 5-letter words for target selection (Wordle-style difficulty)
+    const COMMON_TARGET_WORDS = [
+      'ABOUT', 'ABOVE', 'ABUSE', 'ACTOR', 'ACUTE', 'ADMIT', 'ADOPT', 'ADULT', 'AFTER', 'AGAIN',
+      'AGENT', 'AGREE', 'AHEAD', 'ALARM', 'ALBUM', 'ALERT', 'ALIEN', 'ALIGN', 'ALIKE', 'ALIVE',
+      'ALLOW', 'ALONE', 'ALONG', 'ALTER', 'AMONG', 'ANGER', 'ANGLE', 'ANGRY', 'APART', 'APPLE',
+      'APPLY', 'ARENA', 'ARGUE', 'ARISE', 'ARRAY', 'ARROW', 'ASIDE', 'ASSET', 'AVOID', 'AWAKE',
+      'AWARD', 'AWARE', 'BADLY', 'BAKER', 'BASES', 'BASIC', 'BEACH', 'BEGAN', 'BEGIN', 'BEING',
+      'BELOW', 'BENCH', 'BILLY', 'BIRTH', 'BLACK', 'BLAME', 'BLANK', 'BLIND', 'BLOCK', 'BLOOD',
+      'BOOST', 'BOOTH', 'BOUND', 'BRAIN', 'BRAVE', 'BREAK', 'BREED',
+      'BRIEF', 'BRING', 'BROAD', 'BROKE', 'BROWN', 'BUILT', 'CABLE', 'CARRY',
+      'CATCH', 'CAUSE', 'CHAOS', 'CHARM', 'CHASE', 'CHEAP', 'CHEST',
+      'CHILD', 'CHINA', 'CHOSE', 'CIVIL', 'CLEAN', 'CLEAR',
+      'CLICK', 'CLIMB', 'CLOCK', 'CLOSE', 'CLOUD', 'COAST', 'COULD',
+      'CRAFT', 'CRASH', 'CRAZY', 'CREAM', 'CRIME', 'CROSS', 'CROWD', 'CROWN', 'CRUDE',
+      'CURVE', 'DANCE', 'DATED', 'DEALT', 'DEATH', 'DELAY', 'DEPTH',
+      'DOING', 'DOUBT', 'DOZEN', 'DRAMA', 'DRANK', 'DRAWN', 'DRESS', 'DRILL',
+      'DRINK', 'DROVE', 'DYING', 'EAGER', 'EARLY', 'EARTH', 'EIGHT', 'ELITE', 'EMPTY',
+      'ENEMY', 'ENJOY', 'ENTER', 'ENTRY', 'EQUAL', 'EVERY', 'EXACT', 'EXIST',
+      'EXTRA', 'FAITH', 'FALSE', 'FAULT', 'FIBER', 'FIFTH', 'FIFTY', 'FIGHT',
+      'FLASH', 'FLEET', 'FLUID', 'FORTH', 'FORTY',
+      'FRAME', 'FRANK', 'FRAUD', 'FRESH', 'FRUIT', 'FULLY', 'FUNNY',
+      'GLASS', 'GLOBE', 'GOING', 'GRASS', 'GRAVE', 'GREAT', 'GREEN', 'GROSS', 'GROWN',
+      'GUESS', 'GUEST', 'HARRY', 'HEAVY', 'HENCE', 'HENRY', 'HORSE', 'HOTEL',
+      'JAPAN', 'JIMMY', 'JONES', 'LAUGH', 'LEARN',
+      'LYING', 'MARIA', 'MEANT', 'MINUS', 'MOUSE',
+      'MOUTH', 'MOVIE', 'NEWLY', 'OCCUR', 'OFTEN', 'PAINT', 'PETER',
+      'POUND', 'REALM', 'ROBIN', 'ROGER', 'ROMAN', 'RURAL',
+      'SHOWN', 'SIXTY', 'SIZED', 'SLIDE', 'SMITH', 'SMOKE',
+      'STEEP', 'TWIST'
+    ];
+
+    // Get ALL 5-letter words for guessing validation (keeps comprehensive guessing)
+    const fiveLetterWords = words
+      .filter(word => word.length === 5)
+      .map(word => word.toUpperCase());
+
+    // Target words: Business words + Common words only (NO obscure words!)
+    const targetWords = [
+      ...BUSINESS_WORDS,
+      ...COMMON_TARGET_WORDS.filter(word => !BUSINESS_WORDS.includes(word))
+    ].filter((word, index, self) => self.indexOf(word) === index); // Remove duplicates
+
+    // Create a Set for O(1) word validation (still allows all words for guessing)
+    const validWordSet = new Set(fiveLetterWords);
+    const isValidWordFunc = (word) => validWordSet.has(word);
+
+    console.log(`✅ Loaded ${fiveLetterWords.length} valid 5-letter words for guessing`);
+    console.log(`✅ Available ${targetWords.length} curated target words (no obscure words)`);
+
+    return {
+      VALID_GUESSES: fiveLetterWords,
+      TARGET_WORDS: targetWords,
+      isValidWord: isValidWordFunc
+    };
+  }, []); // Empty dependency array - only calculate once
 
   // Get today's word - ensures ALL users get the same word
   const getTodaysWord = () => {
-    // Use a fixed epoch date to ensure consistency across all users
-    // January 1, 2024 00:00:00 UTC as our starting point
-    const EPOCH_START = new Date('2024-01-01T00:00:00.000Z');
-    const now = new Date();
-    
-    // Calculate days since our epoch in UTC to ensure consistency across timezones
-    const daysSinceEpoch = Math.floor((now.getTime() - EPOCH_START.getTime()) / (1000 * 60 * 60 * 24));
-    
-    // Use a consistent word index that's the same for all users
-    const wordIndex = daysSinceEpoch % TARGET_WORDS.length;
-    
-    console.log(`Today's word calculation: daysSinceEpoch=${daysSinceEpoch}, wordIndex=${wordIndex}, word=${TARGET_WORDS[wordIndex]}`);
-    
+    // Get today's date as YYYY-MM-DD in UTC
+    const today = new Date();
+    const year = today.getUTCFullYear();
+    const month = String(today.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(today.getUTCDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+
+    // Use a simple hash of the date string to get consistent results
+    let hash = 0;
+    for (let i = 0; i < dateString.length; i++) {
+        const char = dateString.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+
+    // Make sure hash is positive
+    const positiveHash = Math.abs(hash);
+    const wordIndex = positiveHash % TARGET_WORDS.length;
+
+    console.log(`Date: ${dateString}, hash: ${hash}, wordIndex: ${wordIndex}, word: ${TARGET_WORDS[wordIndex]}`);
+
     return TARGET_WORDS[wordIndex].toUpperCase();
   };
 
@@ -239,15 +264,21 @@ const Boardle = () => {
     };
 
     initGame();
-  }, [session?.user?.id]);
+  }, [session?.user?.id, TARGET_WORDS.length]); // Add TARGET_WORDS.length to ensure it's loaded
 
-  // Handle input changes - update the board as user types
+  // Optimized input change handler
   const handleInputChange = (e) => {
     const value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+    
     if (value.length <= 5) {
       setCurrentGuess(value);
-      
-      // Update the board display
+      setCurrentCol(value.length);
+    }
+  };
+
+  // Separate useEffect to update the board when currentGuess changes
+  useEffect(() => {
+    if (!gameOver && !hasPlayedToday) {
       const newBoard = board.map(row => [...row]);
       
       // Clear the current row
@@ -256,16 +287,15 @@ const Boardle = () => {
       }
       
       // Fill with the current guess
-      for (let i = 0; i < value.length; i++) {
-        newBoard[currentRow][i] = { ch: value[i], state: '' };
+      for (let i = 0; i < currentGuess.length; i++) {
+        newBoard[currentRow][i] = { ch: currentGuess[i], state: '' };
       }
       
       setBoard(newBoard);
-      setCurrentCol(value.length);
     }
-  };
+  }, [currentGuess, currentRow, gameOver, hasPlayedToday]);
 
-  // Handle form submission
+  // Handle form submission with optimized word validation
   const handleSubmitGuess = async (e) => {
     e.preventDefault();
     
@@ -275,8 +305,8 @@ const Boardle = () => {
       return;
     }
 
-    // Use VALID_GUESSES for validation (much more permissive)
-    if (!VALID_GUESSES.includes(currentGuess)) {
+    // Use optimized O(1) word validation
+    if (!isValidWord(currentGuess)) {
       setMessage('Not in word list');
       setTimeout(() => setMessage(''), 2000);
       return;
@@ -589,7 +619,7 @@ const Boardle = () => {
           How to Play:
         </h3>
         <ul className="text-sm space-y-1" style={{ color: 'var(--umn-maroon-ink)' }}>
-          <li>• Guess the 5-letter business word in 6 tries</li>
+          <li>• Guess the 5-letter word in 6 tries</li>
           <li>• <span style={{ backgroundColor: 'var(--umn-gold)', color: 'var(--umn-maroon)', padding: '2px 4px', borderRadius: '4px' }}>Gold</span> = Correct letter, correct position</li>
           <li>• <span style={{ backgroundColor: '#9CA3AF', color: 'white', padding: '2px 4px', borderRadius: '4px' }}>Gray</span> = Correct letter, wrong position</li>
           <li>• <span style={{ backgroundColor: '#374151', color: 'white', padding: '2px 4px', borderRadius: '4px' }}>Dark</span> = Letter not in word</li>
