@@ -10,6 +10,23 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Mobile responsiveness state
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Handle responsive behavior
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false); // Close mobile menu on desktop
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Enhanced leaderboard fetch with comprehensive tiebreaker system and better error handling
   const fetchLeaderboard = async () => {
@@ -143,23 +160,23 @@ const Dashboard = () => {
 
   // Helper function to determine row styling
   const getRowStyling = (user, index, currentUserId) => {
-  const isCurrentUser = user.id === currentUserId;
-  const isTopThree = index < 3;
-  
-  if (isCurrentUser) {
-    return {
-      backgroundColor: 'var(--umn-maroon)',
-      color: 'white'
-    };
-  } else if (isTopThree) {
-    return {
-      backgroundColor: 'var(--umn-gold)',
-      color: 'var(--umn-maroon)'
-    };
-  } else {
-    return {
-      backgroundColor: 'var(--panel)', // Changed from 'var(--surface)' to 'var(--panel)'
-      color: 'var(--umn-maroon)' // Explicitly set dark text color
+    const isCurrentUser = user.id === currentUserId;
+    const isTopThree = index < 3;
+    
+    if (isCurrentUser) {
+      return {
+        backgroundColor: 'var(--umn-maroon)',
+        color: 'white'
+      };
+    } else if (isTopThree) {
+      return {
+        backgroundColor: 'var(--umn-gold)',
+        color: 'var(--umn-maroon)'
+      };
+    } else {
+      return {
+        backgroundColor: 'var(--panel)',
+        color: 'var(--umn-maroon)'
       };
     }
   };
@@ -167,87 +184,204 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--surface)' }}>
       {/* Header */}
-      <header className="px-6 py-4 border-b-2" style={{ 
+      <header className="px-4 md:px-6 py-4 border-b-2" style={{ 
         backgroundColor: 'var(--panel)', 
         borderColor: 'var(--umn-gold)' 
       }}>
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold" style={{ color: 'var(--umn-maroon)' }}>
-            Carlson Games
-          </h1>
-          
-          {/* Top-right buttons */}
-          <div className="flex gap-3">
-            <button
-              onClick={openWebsite}
-              className="px-4 py-2 rounded-lg font-medium transition-colors duration-200 border-2"
-              style={{
-                backgroundColor: 'transparent',
-                color: 'var(--umn-maroon)',
-                borderColor: 'var(--umn-maroon)'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'var(--umn-maroon)';
-                e.target.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-                e.target.style.color = 'var(--umn-maroon)';
-              }}
-            >
-              Website
-            </button>
+        {/* Mobile Layout: Title above buttons */}
+        {isMobile ? (
+          <div className="space-y-3">
+            {/* Title Row */}
+            <div className="flex justify-center">
+              <h1 className="text-xl font-bold" style={{ color: 'var(--umn-maroon)' }}>
+                Carlson Games
+              </h1>
+            </div>
             
-            <button
-              onClick={openInstagram}
-              className="px-4 py-2 rounded-lg font-medium transition-colors duration-200 border-2"
-              style={{
-                backgroundColor: 'transparent',
-                color: 'var(--umn-maroon)',
-                borderColor: 'var(--umn-maroon)'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'var(--umn-maroon)';
-                e.target.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-                e.target.style.color = 'var(--umn-maroon)';
-              }}
-            >
-              Instagram
-            </button>
-            
-            <button
-              onClick={handleSignOut}
-              className="px-4 py-2 rounded-lg font-medium transition-colors duration-200 border-2"
-              style={{
-                backgroundColor: 'var(--umn-gold)',
-                color: 'var(--umn-maroon)',
-                borderColor: 'var(--umn-gold)'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'var(--umn-gold-dark)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'var(--umn-gold)';
-              }}
-            >
-              Sign Out
-            </button>
+            {/* Buttons Row */}
+            <div className="flex justify-between items-center">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
+                style={{
+                  backgroundColor: 'var(--umn-maroon)',
+                  color: 'white'
+                }}
+                aria-label="Toggle menu"
+              >
+                <span className="text-xl">☰</span>
+              </button>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={openWebsite}
+                  className="px-3 py-2 text-sm rounded-lg font-medium transition-colors duration-200 border-2 min-h-[44px]"
+                  style={{
+                    backgroundColor: 'transparent',
+                    color: 'var(--umn-maroon)',
+                    borderColor: 'var(--umn-maroon)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'var(--umn-maroon)';
+                    e.target.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.color = 'var(--umn-maroon)';
+                  }}
+                >
+                  Website
+                </button>
+                
+                <button
+                  onClick={openInstagram}
+                  className="px-3 py-2 text-sm rounded-lg font-medium transition-colors duration-200 border-2 min-h-[44px]"
+                  style={{
+                    backgroundColor: 'transparent',
+                    color: 'var(--umn-maroon)',
+                    borderColor: 'var(--umn-maroon)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'var(--umn-maroon)';
+                    e.target.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.color = 'var(--umn-maroon)';
+                  }}
+                >
+                  IG
+                </button>
+                
+                <button
+                  onClick={handleSignOut}
+                  className="px-3 py-2 text-sm rounded-lg font-medium transition-colors duration-200 border-2 min-h-[44px]"
+                  style={{
+                    backgroundColor: 'var(--umn-gold)',
+                    color: 'var(--umn-maroon)',
+                    borderColor: 'var(--umn-gold)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'var(--umn-gold-dark)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'var(--umn-gold)';
+                  }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          /* Desktop Layout: Original horizontal layout */
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold" style={{ color: 'var(--umn-maroon)' }}>
+              Carlson Games
+            </h1>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={openWebsite}
+                className="px-4 py-2 rounded-lg font-medium transition-colors duration-200 border-2 min-h-[44px]"
+                style={{
+                  backgroundColor: 'transparent',
+                  color: 'var(--umn-maroon)',
+                  borderColor: 'var(--umn-maroon)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'var(--umn-maroon)';
+                  e.target.style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.color = 'var(--umn-maroon)';
+                }}
+              >
+                Website
+              </button>
+              
+              <button
+                onClick={openInstagram}
+                className="px-4 py-2 rounded-lg font-medium transition-colors duration-200 border-2 min-h-[44px]"
+                style={{
+                  backgroundColor: 'transparent',
+                  color: 'var(--umn-maroon)',
+                  borderColor: 'var(--umn-maroon)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'var(--umn-maroon)';
+                  e.target.style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.color = 'var(--umn-maroon)';
+                }}
+              >
+                Instagram
+              </button>
+              
+              <button
+                onClick={handleSignOut}
+                className="px-4 py-2 rounded-lg font-medium transition-colors duration-200 border-2 min-h-[44px]"
+                style={{
+                  backgroundColor: 'var(--umn-gold)',
+                  color: 'var(--umn-maroon)',
+                  borderColor: 'var(--umn-gold)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'var(--umn-gold-dark)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'var(--umn-gold)';
+                }}
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
-      <div className="flex h-screen">
-        {/* Left Sidebar */}
-        <aside className="w-80 border-r-2 p-6" style={{ 
+      <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} min-h-screen`}>
+        {/* Mobile Overlay */}
+        {isMobile && isMobileMenuOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setIsMobileMenuOpen(false)}
+          ></div>
+        )}
+
+        {/* Left Sidebar - Responsive */}
+        <aside className={`
+          ${isMobile 
+            ? `fixed inset-y-0 left-0 z-50 w-80 transform transition-transform duration-300 ${
+                isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+              }`
+            : 'w-80 relative'
+          } border-r-2 p-4 md:p-6 overflow-y-auto
+        `} style={{ 
           backgroundColor: 'var(--panel)',
           borderColor: 'var(--umn-gold)'
         }}>
+          
+          {/* Mobile Close Button */}
+          {isMobile && (
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="mb-4 p-2 rounded-lg md:hidden w-full min-h-[44px]"
+              style={{ 
+                backgroundColor: 'var(--umn-maroon)', 
+                color: 'white' 
+              }}
+            >
+              ✕ Close Menu
+            </button>
+          )}
+
           {/* Placeholder Image */}
           <div className="mb-6">
-            <div className="w-full h-40 rounded-lg flex items-center justify-center text-white text-lg font-medium"
+            <div className={`w-full ${isMobile ? 'h-32' : 'h-40'} rounded-lg flex items-center justify-center text-white font-medium text-center px-2`}
                  style={{ backgroundColor: 'var(--umn-maroon)' }}>
               Carlson Business Board
             </div>
@@ -291,14 +425,17 @@ const Dashboard = () => {
           </div>
         </aside>
 
-        {/* Main Content Area */}
-        <main className="flex-1 p-6">
-          {/* Tab Navigation */}
+        {/* Main Content Area - Now responsive */}
+        <main className={`flex-1 p-4 md:p-6 ${isMobile ? 'w-full' : ''}`}>
+          {/* Tab Navigation - Responsive */}
           <div className="mb-6">
-            <div className="flex gap-4">
+            <div className="flex gap-2 md:gap-4">
               <button
-                onClick={() => setActiveTab('home')}
-                className={`px-6 py-3 rounded-lg font-medium transition-colors duration-200 ${
+                onClick={() => {
+                  setActiveTab('home');
+                  if (isMobile) setIsMobileMenuOpen(false);
+                }}
+                className={`flex-1 md:flex-none px-4 md:px-6 py-3 rounded-lg font-medium transition-colors duration-200 min-h-[44px] ${
                   activeTab === 'home' ? 'text-white' : ''
                 }`}
                 style={{
@@ -310,8 +447,11 @@ const Dashboard = () => {
                 Home
               </button>
               <button
-                onClick={() => setActiveTab('wordle')}
-                className={`px-6 py-3 rounded-lg font-medium transition-colors duration-200 ${
+                onClick={() => {
+                  setActiveTab('wordle');
+                  if (isMobile) setIsMobileMenuOpen(false);
+                }}
+                className={`flex-1 md:flex-none px-4 md:px-6 py-3 rounded-lg font-medium transition-colors duration-200 min-h-[44px] ${
                   activeTab === 'wordle' ? 'text-white' : ''
                 }`}
                 style={{
@@ -328,43 +468,43 @@ const Dashboard = () => {
           {/* Tab Content */}
           {activeTab === 'home' && (
             <div className="space-y-6">
-              {/* Points Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-6 rounded-lg border-2" style={{ 
+              {/* Points Cards - Responsive Grid */}
+              <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 gap-6'}`}>
+                <div className="p-4 md:p-6 rounded-lg border-2" style={{ 
                   backgroundColor: 'var(--panel)',
                   borderColor: 'var(--umn-gold)'
                 }}>
                   <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--umn-maroon)' }}>
                     Weekly Points
                   </h3>
-                  <p className="text-3xl font-bold" style={{ color: 'var(--umn-gold-dark)' }}>
+                  <p className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`} style={{ color: 'var(--umn-gold-dark)' }}>
                     {userProfile?.weekly_points || 0}
                   </p>
                 </div>
                 
-                <div className="p-6 rounded-lg border-2" style={{ 
+                <div className="p-4 md:p-6 rounded-lg border-2" style={{ 
                   backgroundColor: 'var(--panel)',
                   borderColor: 'var(--umn-gold)'
                 }}>
                   <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--umn-maroon)' }}>
                     Total Points
                   </h3>
-                  <p className="text-3xl font-bold" style={{ color: 'var(--umn-maroon-600)' }}>
+                  <p className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`} style={{ color: 'var(--umn-maroon-600)' }}>
                     {userProfile?.total_points || 0}
                   </p>
                 </div>
               </div>
 
-              {/* Leaderboard */}
-              <div className="p-6 rounded-lg border-2" style={{ 
+              {/* Leaderboard - Mobile optimized */}
+              <div className="p-4 md:p-6 rounded-lg border-2" style={{ 
                 backgroundColor: 'var(--panel)',
                 borderColor: 'var(--umn-gold)'
               }}>
-                <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--umn-maroon)' }}>
+                <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-4`} style={{ color: 'var(--umn-maroon)' }}>
                   Weekly Leaderboard (Top 10)
                 </h3>
                 
-                {/* Tiebreaker explanation */}
+                {/* Tiebreaker explanation - Mobile responsive */}
                 <div className="mb-4 p-2 rounded text-xs" style={{ 
                   backgroundColor: 'var(--surface)',
                   color: 'var(--umn-maroon-ink)'
@@ -394,12 +534,12 @@ const Dashboard = () => {
                       return (
                         <div 
                           key={`${user.username}-${index}`} 
-                          className="flex justify-between items-center p-3 rounded-lg transition-all duration-200"
+                          className={`flex justify-between items-center p-3 rounded-lg transition-all duration-200 ${isMobile ? 'text-sm' : ''}`}
                           style={rowStyling}
                         >
-                          <div className="flex items-center gap-3">
+                          <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-3'}`}>
                             <div className="flex flex-col items-center">
-                              <span className="font-bold text-lg">#{index + 1}</span>
+                              <span className={`font-bold ${isMobile ? 'text-sm' : 'text-lg'}`}>#{index + 1}</span>
                               {isTiedWithPrevious && (
                                 <span className="text-xs opacity-75">tied</span>
                               )}
@@ -407,7 +547,7 @@ const Dashboard = () => {
                             <div className="flex flex-col">
                               <span className="font-medium">
                                 {user.username || 'Unknown User'}
-                                {isCurrentUser && <span className="ml-2 text-sm">(You)</span>}
+                                {isCurrentUser && <span className="ml-2 text-xs">(You)</span>}
                               </span>
                               <span className="text-xs opacity-75">
                                 {user.games_played || 0} games played
@@ -415,7 +555,7 @@ const Dashboard = () => {
                             </div>
                           </div>
                           <div className="text-right">
-                            <span className="font-bold">{user.weekly_points || 0} pts</span>
+                            <span className={`font-bold ${isMobile ? 'text-sm' : ''}`}>{user.weekly_points || 0} pts</span>
                             <div className="text-xs opacity-75">
                               {user.total_points || 0} total
                             </div>
@@ -430,7 +570,6 @@ const Dashboard = () => {
           )}
 
           {activeTab === 'wordle' && <Boardle />}
-
         </main>
       </div>
     </div>
