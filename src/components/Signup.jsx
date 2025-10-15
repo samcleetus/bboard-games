@@ -62,7 +62,7 @@ const Signup = () => {
                 {/* Header */}
                 <div className="text-center">
                     <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
-                        Join BBoard Games
+                        Join Carlson Games
                     </h2>
                     <p style={{ color: 'var(--umn-gold)' }} 
                        className="text-lg font-medium drop-shadow-md">

@@ -136,14 +136,39 @@ const Boardle = () => {
     };
   }, []); // Empty dependency array - only calculate once
 
+  // Helper function to get Central Time date consistently
+  const getCentralTimeDate = () => {
+    const now = new Date();
+    
+    // Determine if we're in Daylight Saving Time (March-November)
+    const year = now.getFullYear();
+    
+    // DST starts second Sunday in March
+    const dstStart = new Date(year, 2, 8); // March 8th
+    dstStart.setDate(dstStart.getDate() + (7 - dstStart.getDay()) % 7); // Move to second Sunday
+    
+    // DST ends first Sunday in November  
+    const dstEnd = new Date(year, 10, 1); // November 1st
+    dstEnd.setDate(dstEnd.getDate() + (7 - dstEnd.getDay()) % 7); // Move to first Sunday
+    
+    const isDST = now >= dstStart && now < dstEnd;
+    const offsetHours = isDST ? -5 : -6; // CDT (-5) or CST (-6)
+    
+    // Calculate Central Time
+    const centralTime = new Date(now.getTime() + (offsetHours * 60 * 60 * 1000));
+    
+    // Return YYYY-MM-DD format
+    const year_ct = centralTime.getUTCFullYear();
+    const month = String(centralTime.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(centralTime.getUTCDate()).padStart(2, '0');
+    
+    return `${year_ct}-${month}-${day}`;
+  };
+
   // Get today's word - ensures ALL users get the same word
   const getTodaysWord = () => {
-    // Get today's date as YYYY-MM-DD in UTC
-    const today = new Date();
-    const year = today.getUTCFullYear();
-    const month = String(today.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(today.getUTCDate()).padStart(2, '0');
-    const dateString = `${year}-${month}-${day}`;
+    // Get today's date as YYYY-MM-DD in Central Time
+    const dateString = getCentralTimeDate();
 
     // Use a simple hash of the date string to get consistent results
     let hash = 0;
@@ -157,7 +182,7 @@ const Boardle = () => {
     const positiveHash = Math.abs(hash);
     const wordIndex = positiveHash % TARGET_WORDS.length;
 
-    console.log(`Date: ${dateString}, hash: ${hash}, wordIndex: ${wordIndex}, word: ${TARGET_WORDS[wordIndex]}`);
+    console.log(`Central Time Date: ${dateString}, hash: ${hash}, wordIndex: ${wordIndex}, word: ${TARGET_WORDS[wordIndex]}`);
 
     return TARGET_WORDS[wordIndex].toUpperCase();
   };
@@ -229,8 +254,8 @@ const Boardle = () => {
         const todaysWord = getTodaysWord();
         setTargetWord(todaysWord);
         
-        // Check if user has played today
-        const today = new Date().toISOString().split('T')[0];
+        // Check if user has played today - using Central Time
+        const today = getCentralTimeDate();
         const { data: gameData, error } = await supabase
           .from('boardle_games')
           .select('*')
@@ -375,8 +400,8 @@ const Boardle = () => {
     if (!session?.user?.id) return;
 
     try {
-      // Record the game
-      const today = new Date().toISOString().split('T')[0];
+      // Record the game using Central Time
+      const today = getCentralTimeDate();
       const { data: gameData, error: gameError } = await supabase
         .from('boardle_games')
         .insert({
