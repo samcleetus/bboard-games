@@ -480,29 +480,37 @@ const Boardle = () => {
 
     let shareText = `Carlson Boardle ${new Date().toLocaleDateString()}\n\n`;
     
-    board.slice(0, isWinner ? currentRow : 6).forEach(row => {
-      const rowText = row.map(cell => {
-        switch (cell.state) {
-          case 'correct': return '🟨'; // Using gold for correct (UMN colors)
-          case 'present': return '🟦'; // Using blue for present
-          case 'absent': return '⬛'; // Black for absent
-          default: return '⬜';
+    // Only include rows that have actual guesses (non-empty cells)
+    const rowsToInclude = isWinner ? currentRow + 1 : 6;
+    
+    board.slice(0, rowsToInclude).forEach(row => {
+        // Check if this row has any letters (skip completely empty rows)
+        const hasContent = row.some(cell => cell.ch !== '');
+        
+        if (hasContent) {
+        const rowText = row.map(cell => {
+            switch (cell.state) {
+            case 'correct': return '🟨'; // Using gold for correct (UMN colors)
+            case 'present': return '🟦'; // Using blue for present
+            case 'absent': return '⬛'; // Black for absent
+            default: return '⬜'; // This shouldn't appear if row has content
+            }
+        }).join('');
+        shareText += rowText + '\n';
         }
-      }).join('');
-      shareText += rowText + '\n';
     });
 
     shareText += `\nPlay at: https://carlson-games.vercel.app`;
 
     if (navigator.share) {
-      navigator.share({
+        navigator.share({
         title: 'Carlson Boardle',
         text: shareText
-      });
+        });
     } else {
-      navigator.clipboard.writeText(shareText);
-      setMessage('Results copied to clipboard!');
-      setTimeout(() => setMessage(''), 2000);
+        navigator.clipboard.writeText(shareText);
+        setMessage('Results copied to clipboard!');
+        setTimeout(() => setMessage(''), 2000);
     }
   };
 
