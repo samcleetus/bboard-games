@@ -501,7 +501,7 @@ const Dashboard = () => {
                 borderColor: 'var(--umn-gold)'
               }}>
                 <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-4`} style={{ color: 'var(--umn-maroon)' }}>
-                  Weekly Leaderboard (Top 10)
+                  Weekly Leaderboard
                 </h3>
                 
                 {/* Tiebreaker explanation - Mobile responsive */}
