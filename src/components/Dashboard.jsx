@@ -158,6 +158,28 @@ const Dashboard = () => {
     window.open('https://instagram.com/carlsonbboard', '_blank');
   };
 
+  // Helper function to add event to Google Calendar
+  const addToGoogleCalendar = (eventTitle, eventDate, startTime, endTime, location) => {
+    // Parse the date and time
+    const year = new Date().getFullYear();
+    const eventDateTime = new Date(`${eventDate}, ${year} ${startTime}`);
+    const endDateTime = new Date(`${eventDate}, ${year} ${endTime}`);
+    
+    // Format dates for Google Calendar (YYYYMMDDTHHMMSSZ format)
+    const formatDateForGoogle = (date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+
+    const startDateFormatted = formatDateForGoogle(eventDateTime);
+    const endDateFormatted = formatDateForGoogle(endDateTime);
+
+    // Create Google Calendar URL
+    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${startDateFormatted}/${endDateFormatted}&location=${encodeURIComponent(location)}&details=${encodeURIComponent(`Carlson Business Board Event: ${eventTitle}`)}`;
+    
+    // Open Google Calendar in a new tab
+    window.open(googleCalendarUrl, '_blank');
+  };
+
   // Helper function to determine row styling
   const getRowStyling = (user, index, currentUserId) => {
     const isCurrentUser = user.id === currentUserId;
@@ -426,44 +448,109 @@ const Dashboard = () => {
             </h3>
             <div className="space-y-3">
               {/* Block for an Event */}
-              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
+              <div 
+                className="event-card p-3 rounded-lg cursor-pointer" 
+                style={{ backgroundColor: 'var(--surface)' }}
+                onClick={() => addToGoogleCalendar(
+                  'Vitamin Water Giveaway',
+                  'Oct 27',
+                  '11:30 AM',
+                  '12:45 PM',
+                  'CSOM 101cc'
+                )}
+              >
                 <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
                   Vitamin Water Giveaway - Oct 27
                 </p>
                 <p className="text-xs text-gray-600">CSOM 101cc</p>
                 <p className="text-xs text-gray-600">11:30 - 12:45</p>
+                <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
+                  📅 Click to add to Google Calendar
+                </p>
               </div>
               {/* Block for an Event */}
-              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
+              <div 
+                className="event-card p-3 rounded-lg cursor-pointer" 
+                style={{ backgroundColor: 'var(--surface)' }}
+                onClick={() => addToGoogleCalendar(
+                  'Ice Skating',
+                  'Oct 28',
+                  '5:30 PM',
+                  '6:30 PM',
+                  'Mariucci Arena'
+                )}
+              >
                 <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
                   Ice Skating - Oct 28
                 </p>
-                <p className="text-xs text-gray-600">Mariucci Areana</p>
+                <p className="text-xs text-gray-600">Mariucci Arena</p>
                 <p className="text-xs text-gray-600">5:30 - 6:30</p>
+                <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
+                  📅 Click to add to Google Calendar
+                </p>
               </div>
               {/* Block for an Event */}
-              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
+              <div 
+                className="event-card p-3 rounded-lg cursor-pointer" 
+                style={{ backgroundColor: 'var(--surface)' }}
+                onClick={() => addToGoogleCalendar(
+                  'Halloween Scare/Stress Event',
+                  'Oct 29',
+                  '11:30 AM',
+                  '1:00 PM',
+                  'CSOM 110'
+                )}
+              >
                 <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
                   Halloween Scare/Stress Event - Oct 29
                 </p>
                 <p className="text-xs text-gray-600">CSOM 110</p>
                 <p className="text-xs text-gray-600">11:30 - 1:00</p>
+                <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
+                  📅 Click to add to Google Calendar
+                </p>
               </div>
               {/* Block for an Event */}
-              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
+              <div 
+                className="event-card p-3 rounded-lg cursor-pointer" 
+                style={{ backgroundColor: 'var(--surface)' }}
+                onClick={() => addToGoogleCalendar(
+                  'Navigating an Uncertain Job Market',
+                  'Oct 30',
+                  '12:00 PM',
+                  '1:00 PM',
+                  'TBD'
+                )}
+              >
                 <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
                   Navigating an Uncertain Job Market - Oct 30
                 </p>
                 <p className="text-xs text-gray-600">TBD</p>
                 <p className="text-xs text-gray-600">12:00 - 1:00</p>
+                <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
+                  📅 Click to add to Google Calendar
+                </p>
               </div>
               {/* Block for an Event */}
-              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
+              <div 
+                className="event-card p-3 rounded-lg cursor-pointer" 
+                style={{ backgroundColor: 'var(--surface)' }}
+                onClick={() => addToGoogleCalendar(
+                  'Freshman Internship Workshop',
+                  'Nov 6',
+                  '5:30 PM',
+                  '6:30 PM',
+                  'Hanson Hall 1-102'
+                )}
+              >
                 <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
                   Freshman Internship Workshop - Nov 6
                 </p>
                 <p className="text-xs text-gray-600">Hanson Hall 1-102</p>
                 <p className="text-xs text-gray-600">5:30 - 6:30</p>
+                <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
+                  📅 Click to add to Google Calendar
+                </p>
               </div>
             </div>
           </div>
