@@ -408,6 +408,13 @@ const Dashboard = () => {
               alt="Carlson Business Board" 
               className="w-full rounded-lg"
             />
+            {/* Fallback placeholder */}
+            <div 
+              className={`w-full ${isMobile ? 'h-32' : 'h-40'} rounded-lg flex items-center justify-center text-white font-medium text-center px-2`}
+              style={{ backgroundColor: 'var(--umn-maroon)', display: 'none' }}
+            >
+              Carlson Business Board
+            </div>
           </div>
 
           {/* Updates Section */}
