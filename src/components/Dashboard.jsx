@@ -379,12 +379,13 @@ const Dashboard = () => {
             </button>
           )}
 
-          {/* Placeholder Image */}
+          {/* Image */}
           <div className="mb-6">
-            <div className={`w-full ${isMobile ? 'h-32' : 'h-40'} rounded-lg flex items-center justify-center text-white font-medium text-center px-2`}
-                 style={{ backgroundColor: 'var(--umn-maroon)' }}>
-              Carlson Business Board
-            </div>
+            <img 
+              src="/image.webp" 
+              alt="Carlson Business Board" 
+              className="w-full rounded-lg"
+            />
           </div>
 
           {/* Updates Section */}
@@ -397,13 +398,22 @@ const Dashboard = () => {
               Updates
             </h3>
             <div className="space-y-3">
+              {/* Block for an Update*/}
               <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
                 <p className="text-sm" style={{ color: 'var(--umn-maroon-ink)' }}>
                   🎉 Welcome to Carlson Games!
                 </p>
               </div>
+              {/* Block for an Update*/}
+              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
+                <p className="text-sm" style={{ color: 'var(--umn-maroon-ink)' }}>
+                  Join us for Wellness Week from October 27-30!
+                </p>
+              </div>
+              {/* Enter new updates here */}
             </div>
           </div>
+          
 
           {/* Scheduled Events */}
           <div>
@@ -415,11 +425,45 @@ const Dashboard = () => {
               Upcoming Events
             </h3>
             <div className="space-y-3">
+              {/* Block for an Event */}
               <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
                 <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
-                  Check here for upcoming events!
+                  Vitamin Water Giveaway - Oct 27
                 </p>
-                <p className="text-xs text-gray-600">------</p>
+                <p className="text-xs text-gray-600">CSOM 101cc</p>
+                <p className="text-xs text-gray-600">11:30 - 12:45</p>
+              </div>
+              {/* Block for an Event */}
+              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
+                <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
+                  Ice Skating - Oct 28
+                </p>
+                <p className="text-xs text-gray-600">Mariucci Areana</p>
+                <p className="text-xs text-gray-600">5:30 - 6:30</p>
+              </div>
+              {/* Block for an Event */}
+              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
+                <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
+                  Halloween Scare/Stress Event - Oct 29
+                </p>
+                <p className="text-xs text-gray-600">CSOM 110</p>
+                <p className="text-xs text-gray-600">11:30 - 1:00</p>
+              </div>
+              {/* Block for an Event */}
+              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
+                <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
+                  Navigating an Uncertain Job Market - Oct 30
+                </p>
+                <p className="text-xs text-gray-600">TBD</p>
+                <p className="text-xs text-gray-600">12:00 - 1:00</p>
+              </div>
+              {/* Block for an Event */}
+              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
+                <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
+                  Freshman Internship Workshop - Nov 6
+                </p>
+                <p className="text-xs text-gray-600">Hanson Hall 1-102</p>
+                <p className="text-xs text-gray-600">5:30 - 6:30</p>
               </div>
             </div>
           </div>
