@@ -6,6 +6,7 @@ const Signup = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
+    const [gradeLevel, setGradeLevel] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -18,7 +19,7 @@ const Signup = () => {
         setError("");
         
         try {
-            const result = await signUpNewUser(email, password, username);
+            const result = await signUpNewUser(email, password, username, gradeLevel);
 
             if (result.success) {
                 navigate('/dashboard');
@@ -152,6 +153,57 @@ const Signup = () => {
                                 placeholder="Enter your personal email"
                                 required
                             />
+                        </div>
+
+                        {/* Grade Level Dropdown */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2 text-white drop-shadow-sm">
+                                Grade Level
+                            </label>
+                            <select 
+                                onChange={(e) => setGradeLevel(e.target.value)} 
+                                value={gradeLevel}
+                                className="w-full px-4 py-3 rounded-lg transition-all duration-300 focus:outline-none backdrop-blur-sm"
+                                style={{
+                                    background: 'rgba(255, 255, 255, 0.1)',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    color: 'white',
+                                    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)'
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+                                    e.target.style.borderColor = 'var(--umn-gold)';
+                                    e.target.style.boxShadow = `0 0 0 2px rgba(255, 204, 51, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1)`;
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                                    e.target.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.1)';
+                                }}
+                                required
+                            >
+                                <option value="" style={{ backgroundColor: 'var(--umn-maroon)', color: 'white' }}>
+                                    Select your grade level
+                                </option>
+                                <option value="freshman" style={{ backgroundColor: 'var(--umn-maroon)', color: 'white' }}>
+                                    Freshman
+                                </option>
+                                <option value="sophomore" style={{ backgroundColor: 'var(--umn-maroon)', color: 'white' }}>
+                                    Sophomore
+                                </option>
+                                <option value="junior" style={{ backgroundColor: 'var(--umn-maroon)', color: 'white' }}>
+                                    Junior
+                                </option>
+                                <option value="senior" style={{ backgroundColor: 'var(--umn-maroon)', color: 'white' }}>
+                                    Senior
+                                </option>
+                                <option value="carlson_graduate" style={{ backgroundColor: 'var(--umn-maroon)', color: 'white' }}>
+                                    Carlson Graduate
+                                </option>
+                                <option value="other" style={{ backgroundColor: 'var(--umn-maroon)', color: 'white' }}>
+                                    Other
+                                </option>
+                            </select>
                         </div>
 
                         {/* Password Input */}

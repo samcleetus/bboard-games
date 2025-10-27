@@ -27,22 +27,55 @@ export const AuthContextProvider = ({children}) => {
   };
 
   // Sign Up 
-  const signUpNewUser = async (email, password, username) => {
-    const {data, error} = await supabase.auth.signUp({
-      email: email,
-      password: password,
-      options: {
-        data: {
-          username: username
+  const signUpNewUser = async (email, password, username, gradeLevel) => {
+    try {
+      // First, create the auth user
+      const {data, error} = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            username: username,
+            grade_level: gradeLevel
+          }
+        }
+      })
+
+      if (error) {
+        console.error("Error signing up: ", error);
+        return { success: false, error };
+      }
+
+      // If user creation was successful and we have a user ID, update the profile
+      if (data.user && data.user.id) {
+        try {
+          // Wait a moment for the profile trigger to create the initial row
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Update the profile with grade level
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ 
+              username: username,
+              grade_level: gradeLevel 
+            })
+            .eq('id', data.user.id);
+
+          if (profileError) {
+            console.error("Error updating profile: ", profileError);
+            // Don't fail the signup if profile update fails
+          }
+        } catch (profileError) {
+          console.error("Error updating profile: ", profileError);
+          // Don't fail the signup if profile update fails
         }
       }
-    })
 
-    if (error) {
+      return { success: true, data };
+    } catch (error) {
       console.error("Error signing up: ", error);
       return { success: false, error };
     }
-    return { success: true, data };
   }
 
   // Sign In
