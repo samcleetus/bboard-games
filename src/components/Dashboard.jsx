@@ -453,28 +453,8 @@ const Dashboard = () => {
                 }}>
               Upcoming Events
             </h3>
+
             <div className="space-y-3">
-              {/* Block for an Event */}
-              <div 
-                className="event-card p-3 rounded-lg cursor-pointer" 
-                style={{ backgroundColor: 'var(--surface)' }}
-                onClick={() => addToGoogleCalendar(
-                  'Vitamin Water Giveaway',
-                  'Oct 27',
-                  '11:30 AM',
-                  '12:45 PM',
-                  'CSOM 101cc'
-                )}
-              >
-                <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
-                  Vitamin Water Giveaway - Oct 27
-                </p>
-                <p className="text-xs text-gray-600">CSOM 101cc</p>
-                <p className="text-xs text-gray-600">11:30 - 12:45</p>
-                <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
-                  📅 Click to add to Google Calendar
-                </p>
-              </div>
               {/* Block for an Event */}
               <div 
                 className="event-card p-3 rounded-lg cursor-pointer" 
