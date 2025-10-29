@@ -98,7 +98,7 @@ const Signup = () => {
                         {/* Username Input */}
                         <div>
                             <label className="block text-sm font-medium mb-2 text-white drop-shadow-sm">
-                                Username
+                                Name
                             </label>
                             <input 
                                 onChange={(e) => setUsername(e.target.value)} 
@@ -120,7 +120,7 @@ const Signup = () => {
                                     e.target.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.1)';
                                 }}
                                 type="text" 
-                                placeholder="Choose a username"
+                                placeholder="Enter your name"
                                 required
                             />
                         </div>
@@ -150,7 +150,7 @@ const Signup = () => {
                                     e.target.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.1)';
                                 }}
                                 type="email" 
-                                placeholder="Enter your personal email"
+                                placeholder="Enter your UMN email"
                                 required
                             />
                         </div>
