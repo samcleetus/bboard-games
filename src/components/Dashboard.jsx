@@ -476,7 +476,7 @@ const Dashboard = () => {
                   📅 Click to add to Google Calendar
                 </p>
               </div>*/}
-              
+
               {/* Block for an Event */}
               <div 
                 className="event-card p-3 rounded-lg cursor-pointer" 
@@ -536,6 +536,28 @@ const Dashboard = () => {
                 </p>
                 <p className="text-xs text-gray-600">Hanson Hall 1-102</p>
                 <p className="text-xs text-gray-600">5:30 - 6:30</p>
+                <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
+                  📅 Click to add to Google Calendar
+                </p>
+              </div>
+              {/* Block for an Event */}
+              <div 
+                className="event-card p-3 rounded-lg cursor-pointer" 
+                style={{ backgroundColor: 'var(--surface)' }}
+                onClick={() => addToGoogleCalendar(
+                  'Roommate Speed Dating',
+                  'Nov 4',
+                  '4:30 PM',
+                  '6:00 PM',
+                  'Hanson Hall 1-108'
+                )}
+              >
+                <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
+                  Roommate Speed Dating - Nov 4
+                </p>
+                <p className="text-xs text-gray-600">Hanson Hall 1-108</p>
+                <p className="text-xs text-gray-600">4:30 - 6:00</p>
+                <p className="text-xs text-gray-600">RSVP @ z.umn.edu/Roommate_SpeedDatingRSVP</p>
                 <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
                   📅 Click to add to Google Calendar
                 </p>
