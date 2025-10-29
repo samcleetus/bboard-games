@@ -456,7 +456,7 @@ const Dashboard = () => {
 
             <div className="space-y-3">
               {/* Block for an Event */}
-              <div 
+              {/*<div 
                 className="event-card p-3 rounded-lg cursor-pointer" 
                 style={{ backgroundColor: 'var(--surface)' }}
                 onClick={() => addToGoogleCalendar(
@@ -475,7 +475,8 @@ const Dashboard = () => {
                 <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
                   📅 Click to add to Google Calendar
                 </p>
-              </div>
+              </div>*/}
+              
               {/* Block for an Event */}
               <div 
                 className="event-card p-3 rounded-lg cursor-pointer" 
