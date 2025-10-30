@@ -209,13 +209,12 @@ const Dashboard = () => {
       // **FIXED DATE FILTERING** - Now properly handles today and past events
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Start of today
-      
-      const twoWeeksFromToday = new Date(today);
-      twoWeeksFromToday.setDate(today.getDate() + 14); // 14 days from today
-      
+      const oneWeeksFromToday = new Date(today);
+      oneWeeksFromToday.setDate(today.getDate() + 7); // 7 days from today
+
       console.log('Date filtering:', {
         today: today.toDateString(),
-        twoWeeksFromToday: twoWeeksFromToday.toDateString()
+        oneWeeksFromToday: oneWeeksFromToday.toDateString()
       });
       
       const filteredEvents = eventsData.filter(event => {
@@ -224,9 +223,9 @@ const Dashboard = () => {
         // **KEY FIX**: Include today (>=) and exclude past events
         const isToday = eventDate.getTime() === today.getTime();
         const isFuture = eventDate > today;
-        const isWithinTwoWeeks = eventDate <= twoWeeksFromToday;
-        const shouldInclude = (isToday || isFuture) && isWithinTwoWeeks;
-        
+        const isWithinOneWeek = eventDate <= oneWeeksFromToday;
+        const shouldInclude = (isToday || isFuture) && isWithinOneWeek;
+
         console.log('Date check:', {
           eventName: event.name,
           eventDateStr: event.date,
@@ -234,7 +233,7 @@ const Dashboard = () => {
           today: today.toDateString(),
           isToday,
           isFuture,
-          isWithinTwoWeeks,
+          isWithinOneWeek,
           shouldInclude
         });
         
