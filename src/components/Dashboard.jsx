@@ -482,27 +482,6 @@ const Dashboard = () => {
                 className="event-card p-3 rounded-lg cursor-pointer" 
                 style={{ backgroundColor: 'var(--surface)' }}
                 onClick={() => addToGoogleCalendar(
-                  'Halloween Scare/Stress Event',
-                  'Oct 29',
-                  '11:30 AM',
-                  '1:00 PM',
-                  'CSOM 110'
-                )}
-              >
-                <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
-                  Halloween Scare/Stress Event - Oct 29
-                </p>
-                <p className="text-xs text-gray-600">CSOM 110</p>
-                <p className="text-xs text-gray-600">11:30 - 1:00</p>
-                <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
-                  📅 Click to add to Google Calendar
-                </p>
-              </div>
-              {/* Block for an Event */}
-              <div 
-                className="event-card p-3 rounded-lg cursor-pointer" 
-                style={{ backgroundColor: 'var(--surface)' }}
-                onClick={() => addToGoogleCalendar(
                   'Navigating an Uncertain Job Market',
                   'Oct 30',
                   '12:00 PM',
