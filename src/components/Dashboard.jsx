@@ -15,6 +15,10 @@ const Dashboard = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
+  // Handle Google Sheets Events Fetching + Setting
+  const [events, setEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+
   // Handle responsive behavior
   useEffect(() => {
     const handleResize = () => {
@@ -133,10 +137,148 @@ const Dashboard = () => {
     }
   };
 
+  // Fetch Data for Events from Google Sheet
+  const fetchEventsFromGoogleSheet = async () => {
+    try {
+      setEventsLoading(true);
+      console.log('Starting to fetch events from Google Sheet...');
+      
+      const SHEET_ID = '1CQipIDKw9g7MqyU4ypklle6-XUlwrzYxQWDtbx8KBvo';
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+      
+      console.log('Fetching from URL:', csvUrl);
+      
+      const response = await fetch(csvUrl);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const csvText = await response.text();
+      console.log('Raw CSV data:', csvText);
+      
+      // Parse CSV data
+      const lines = csvText.split('\n');
+      
+      if (lines.length < 2) {
+        console.log('No data rows found in CSV');
+        setEvents([]);
+        return;
+      }
+      
+      const eventsData = lines.slice(1)
+        .filter(line => line.trim())
+        .map((line, index) => {
+          console.log(`Processing line ${index + 1}:`, line);
+          
+          // Better CSV parsing to handle commas in quotes
+          const values = [];
+          let currentValue = '';
+          let insideQuotes = false;
+          
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+              insideQuotes = !insideQuotes;
+            } else if (char === ',' && !insideQuotes) {
+              values.push(currentValue.trim());
+              currentValue = '';
+            } else {
+              currentValue += char;
+            }
+          }
+          values.push(currentValue.trim()); // Add the last value
+          
+          return {
+            name: values[0]?.replace(/"/g, '') || '',
+            date: values[1]?.replace(/"/g, '') || '',
+            startTime: values[2]?.replace(/"/g, '') || '',
+            endTime: values[3]?.replace(/"/g, '') || '',
+            location: values[4]?.replace(/"/g, '') || '',
+            additionalInfo: values[5]?.replace(/"/g, '') || ''
+          };
+        })
+        .filter(event => {
+          const isValid = event.name && event.date;
+          console.log('Event validation:', event, 'Valid:', isValid);
+          return isValid;
+        });
+      
+      console.log('Parsed events data:', eventsData);
+      
+      // **FIXED DATE FILTERING** - Now properly handles today and past events
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Start of today
+      
+      const twoWeeksFromToday = new Date(today);
+      twoWeeksFromToday.setDate(today.getDate() + 14); // 14 days from today
+      
+      console.log('Date filtering:', {
+        today: today.toDateString(),
+        twoWeeksFromToday: twoWeeksFromToday.toDateString()
+      });
+      
+      const filteredEvents = eventsData.filter(event => {
+        const eventDate = parseEventDate(event.date);
+        
+        // **KEY FIX**: Include today (>=) and exclude past events
+        const isToday = eventDate.getTime() === today.getTime();
+        const isFuture = eventDate > today;
+        const isWithinTwoWeeks = eventDate <= twoWeeksFromToday;
+        const shouldInclude = (isToday || isFuture) && isWithinTwoWeeks;
+        
+        console.log('Date check:', {
+          eventName: event.name,
+          eventDateStr: event.date,
+          eventDate: eventDate.toDateString(),
+          today: today.toDateString(),
+          isToday,
+          isFuture,
+          isWithinTwoWeeks,
+          shouldInclude
+        });
+        
+        return shouldInclude;
+      });
+      
+      // Sort events by date
+      filteredEvents.sort((a, b) => parseEventDate(a.date) - parseEventDate(b.date));
+      
+      console.log('Final filtered and sorted events:', filteredEvents);
+      setEvents(filteredEvents);
+      
+    } catch (error) {
+      console.error('Error fetching events from Google Sheet:', error);
+      setEvents([]);
+    } finally {
+      setEventsLoading(false);
+    }
+  };
+
+  // Helper function to parse event dates
+  const parseEventDate = (dateStr) => {
+    const currentYear = new Date().getFullYear();
+    let eventDate;
+    
+    // Handle different date formats
+    if (dateStr.includes('-')) {
+      // Format: 2024-10-29
+      eventDate = new Date(dateStr);
+    } else {
+      // Format: Oct 29
+      eventDate = new Date(`${dateStr}, ${currentYear}`);
+    }
+    
+    // Set to start of day for accurate comparison
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate;
+  };
+
   useEffect(() => {
     if (session?.user?.id) {
       fetchUserProfile(session.user.id);
       fetchLeaderboard();
+      fetchEventsFromGoogleSheet();
     }
   }, [session]);
 
@@ -455,92 +597,46 @@ const Dashboard = () => {
             </h3>
 
             <div className="space-y-3">
-              {/* Block for an Event */}
-              {/*<div 
-                className="event-card p-3 rounded-lg cursor-pointer" 
-                style={{ backgroundColor: 'var(--surface)' }}
-                onClick={() => addToGoogleCalendar(
-                  'Ice Skating',
-                  'Oct 28',
-                  '5:30 PM',
-                  '6:30 PM',
-                  'Mariucci Arena'
-                )}
-              >
-                <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
-                  Ice Skating - Oct 28
-                </p>
-                <p className="text-xs text-gray-600">Mariucci Arena</p>
-                <p className="text-xs text-gray-600">5:30 - 6:30</p>
-                <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
-                  📅 Click to add to Google Calendar
-                </p>
-              </div>*/}
-
-              {/* Block for an Event */}
-              <div 
-                className="event-card p-3 rounded-lg cursor-pointer" 
-                style={{ backgroundColor: 'var(--surface)' }}
-                onClick={() => addToGoogleCalendar(
-                  'Navigating an Uncertain Job Market',
-                  'Oct 30',
-                  '12:00 PM',
-                  '1:00 PM',
-                  'TBD'
-                )}
-              >
-                <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
-                  Navigating an Uncertain Job Market - Oct 30
-                </p>
-                <p className="text-xs text-gray-600">TBD</p>
-                <p className="text-xs text-gray-600">12:00 - 1:00</p>
-                <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
-                  📅 Click to add to Google Calendar
-                </p>
-              </div>
-              {/* Block for an Event */}
-              <div 
-                className="event-card p-3 rounded-lg cursor-pointer" 
-                style={{ backgroundColor: 'var(--surface)' }}
-                onClick={() => addToGoogleCalendar(
-                  'Freshman Internship Workshop',
-                  'Nov 6',
-                  '5:30 PM',
-                  '6:30 PM',
-                  'Hanson Hall 1-102'
-                )}
-              >
-                <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
-                  Freshman Internship Workshop - Nov 6
-                </p>
-                <p className="text-xs text-gray-600">Hanson Hall 1-102</p>
-                <p className="text-xs text-gray-600">5:30 - 6:30</p>
-                <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
-                  📅 Click to add to Google Calendar
-                </p>
-              </div>
-              {/* Block for an Event */}
-              <div 
-                className="event-card p-3 rounded-lg cursor-pointer" 
-                style={{ backgroundColor: 'var(--surface)' }}
-                onClick={() => addToGoogleCalendar(
-                  'Roommate Speed Dating',
-                  'Nov 4',
-                  '4:30 PM',
-                  '6:00 PM',
-                  'Hanson Hall 1-108'
-                )}
-              >
-                <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
-                  Roommate Speed Dating - Nov 4
-                </p>
-                <p className="text-xs text-gray-600">Hanson Hall 1-108</p>
-                <p className="text-xs text-gray-600">4:30 - 6:00</p>
-                <p className="text-xs text-gray-600">RSVP @ z.umn.edu/Roommate_SpeedDatingRSVP</p>
-                <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
-                  📅 Click to add to Google Calendar
-                </p>
-              </div>
+              {eventsLoading ? (
+                <div className="p-3 rounded-lg text-center" style={{ backgroundColor: 'var(--surface)' }}>
+                  <p className="text-sm" style={{ color: 'var(--umn-maroon-ink)' }}>
+                    Loading events...
+                  </p>
+                </div>
+              ) : events.length === 0 ? (
+                <div className="p-3 rounded-lg text-center" style={{ backgroundColor: 'var(--surface)' }}>
+                  <p className="text-sm" style={{ color: 'var(--umn-maroon-ink)' }}>
+                    No upcoming events in the next two weeks.
+                  </p>
+                </div>
+              ) : (
+                events.map((event, index) => (
+                  <div 
+                    key={`event-${index}`}
+                    className="event-card p-3 rounded-lg cursor-pointer" 
+                    style={{ backgroundColor: 'var(--surface)' }}
+                    onClick={() => addToGoogleCalendar(
+                      event.name,
+                      event.date,
+                      event.startTime,
+                      event.endTime,
+                      event.location
+                    )}
+                  >
+                    <p className="font-medium text-sm" style={{ color: 'var(--umn-maroon)' }}>
+                      {event.name} - {event.date}
+                    </p>
+                    <p className="text-xs text-gray-600">{event.location}</p>
+                    <p className="text-xs text-gray-600">{event.startTime} - {event.endTime}</p>
+                    {event.additionalInfo && (
+                      <p className="text-xs text-gray-600">{event.additionalInfo}</p>
+                    )}
+                    <p className="text-xs mt-1 opacity-75" style={{ color: 'var(--umn-maroon)' }}>
+                      📅 Click to add to Google Calendar
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </aside>
