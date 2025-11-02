@@ -647,6 +647,8 @@ const Dashboard = () => {
                 onClick={() => {
                   setActiveTab('home');
                   if (isMobile) setIsMobileMenuOpen(false);
+                  // Scroll to top when switching tabs
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className={`flex-1 md:flex-none px-4 md:px-6 py-3 rounded-lg font-medium transition-colors duration-200 min-h-[44px] ${
                   activeTab === 'home' ? 'text-white' : ''
@@ -663,6 +665,8 @@ const Dashboard = () => {
                 onClick={() => {
                   setActiveTab('wordle');
                   if (isMobile) setIsMobileMenuOpen(false);
+                  // Scroll to top when switching tabs
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className={`flex-1 md:flex-none px-4 md:px-6 py-3 rounded-lg font-medium transition-colors duration-200 min-h-[44px] ${
                   activeTab === 'wordle' ? 'text-white' : ''

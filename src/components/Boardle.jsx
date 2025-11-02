@@ -369,13 +369,6 @@ const Boardle = () => {
       setCurrentRow(currentRow + 1);
       setCurrentCol(0);
       setCurrentGuess('');
-      
-      // Auto-focus input for next guess
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 100);
     }
   };
 
@@ -474,8 +467,8 @@ const Boardle = () => {
         if (hasContent) {
         const rowText = row.map(cell => {
             switch (cell.state) {
-            case 'correct': return '🟨'; // Using gold for correct (UMN colors)
-            case 'present': return '🟥'; // Using red for present
+            case 'correct': return '🟫'; // Changed: Brown/maroon for correct position
+            case 'present': return '🟨'; // Changed: Gold/yellow for wrong position  
             case 'absent': return '⬛'; // Black for absent
             default: return '⬜'; // This shouldn't appear if row has content
             }
@@ -545,13 +538,13 @@ const Boardle = () => {
                 style={{
                   borderColor: cell.ch ? 'var(--umn-maroon)' : 'var(--line)',
                   backgroundColor: 
-                    cell.state === 'correct' ? 'var(--umn-gold)' :
-                    cell.state === 'present' ? 'var(--umn-maroon)' :
+                    cell.state === 'correct' ? 'var(--umn-maroon)' :  // Changed: Maroon for correct position
+                    cell.state === 'present' ? 'var(--umn-gold)' :    // Changed: Gold for wrong position
                     cell.state === 'absent' ? '#374151' :
                     'var(--panel)',
                   color: 
-                    cell.state === 'correct' ? 'var(--umn-maroon)' :
-                    cell.state === 'present' ? 'white' :
+                    cell.state === 'correct' ? 'white' :               // Changed: White text on maroon
+                    cell.state === 'present' ? 'var(--umn-maroon)' :  // Changed: Maroon text on gold
                     cell.state === 'absent' ? 'white' :
                     'var(--umn-maroon)'
                 }}
@@ -574,13 +567,13 @@ const Boardle = () => {
                 className="w-10 h-12 rounded flex items-center justify-center text-sm font-bold border transition-all duration-200"
                 style={{
                   backgroundColor: 
-                    usedLetters[letter] === 'correct' ? 'var(--umn-gold)' :
-                    usedLetters[letter] === 'present' ? 'var(--umn-maroon)' :
+                    usedLetters[letter] === 'correct' ? 'var(--umn-maroon)' :  // Changed: Maroon for correct
+                    usedLetters[letter] === 'present' ? 'var(--umn-gold)' :    // Changed: Gold for wrong position
                     usedLetters[letter] === 'absent' ? '#374151' :
                     'var(--panel)',
                   color: 
-                    usedLetters[letter] === 'correct' ? 'var(--umn-maroon)' :
-                    usedLetters[letter] === 'present' ? 'white' :
+                    usedLetters[letter] === 'correct' ? 'white' :               // Changed: White on maroon
+                    usedLetters[letter] === 'present' ? 'var(--umn-maroon)' :  // Changed: Maroon on gold
                     usedLetters[letter] === 'absent' ? 'white' :
                     'var(--umn-maroon)',
                   borderColor: 
@@ -600,13 +593,13 @@ const Boardle = () => {
                 className="w-10 h-12 rounded flex items-center justify-center text-sm font-bold border transition-all duration-200"
                 style={{
                   backgroundColor: 
-                    usedLetters[letter] === 'correct' ? 'var(--umn-gold)' :
-                    usedLetters[letter] === 'present' ? 'var(--umn-maroon)' :
+                    usedLetters[letter] === 'correct' ? 'var(--umn-maroon)' :
+                    usedLetters[letter] === 'present' ? 'var(--umn-gold)' :
                     usedLetters[letter] === 'absent' ? '#374151' :
                     'var(--panel)',
                   color: 
-                    usedLetters[letter] === 'correct' ? 'var(--umn-maroon)' :
-                    usedLetters[letter] === 'present' ? 'white' :
+                    usedLetters[letter] === 'correct' ? 'white' :
+                    usedLetters[letter] === 'present' ? 'var(--umn-maroon)' :
                     usedLetters[letter] === 'absent' ? 'white' :
                     'var(--umn-maroon)',
                   borderColor: 
@@ -626,13 +619,13 @@ const Boardle = () => {
                 className="w-10 h-12 rounded flex items-center justify-center text-sm font-bold border transition-all duration-200"
                 style={{
                   backgroundColor: 
-                    usedLetters[letter] === 'correct' ? 'var(--umn-gold)' :
-                    usedLetters[letter] === 'present' ? 'var(--umn-maroon)' :
+                    usedLetters[letter] === 'correct' ? 'var(--umn-maroon)' :
+                    usedLetters[letter] === 'present' ? 'var(--umn-gold)' :
                     usedLetters[letter] === 'absent' ? '#374151' :
                     'var(--panel)',
                   color: 
-                    usedLetters[letter] === 'correct' ? 'var(--umn-maroon)' :
-                    usedLetters[letter] === 'present' ? 'white' :
+                    usedLetters[letter] === 'correct' ? 'white' :
+                    usedLetters[letter] === 'present' ? 'var(--umn-maroon)' :
                     usedLetters[letter] === 'absent' ? 'white' :
                     'var(--umn-maroon)',
                   borderColor: 
@@ -642,14 +635,6 @@ const Boardle = () => {
                 {letter}
               </div>
             ))}
-          </div>
-          
-          {/* Keyboard Legend - Desktop Only */}
-          <div className="mt-4 text-center text-xs" style={{ color: 'var(--umn-maroon-ink)' }}>
-            Virtual keyboard shows letter states: 
-            <span style={{ backgroundColor: 'var(--umn-gold)', color: 'var(--umn-maroon)', padding: '1px 3px', borderRadius: '2px', margin: '0 2px' }}>Gold</span> = Correct, 
-            <span style={{ backgroundColor: 'var(--umn-maroon)', color: 'white', padding: '1px 3px', borderRadius: '2px', margin: '0 2px' }}>Maroon</span> = Wrong position, 
-            <span style={{ backgroundColor: '#374151', color: 'white', padding: '1px 3px', borderRadius: '2px', margin: '0 2px' }}>Dark</span> = Not in word
           </div>
         </div>
       )}
@@ -671,7 +656,6 @@ const Boardle = () => {
                 backgroundColor: 'var(--panel)',
                 color: 'var(--umn-maroon)'
               }}
-              autoFocus
               autoComplete="off"
               autoCapitalize="characters"
               spellCheck="false"
@@ -693,7 +677,7 @@ const Boardle = () => {
           </div>
           
           <div className="text-center text-sm" style={{ color: 'var(--umn-maroon-ink)' }}>
-            {isDesktop ? 'Type a 5-letter word and press Submit or Enter' : 'Type a 5-letter word using your device keyboard'}
+            {isDesktop ? 'Click the input field above and type a 5-letter word' : 'Tap the input field above to start typing'}
           </div>
         </form>
       )}
@@ -728,8 +712,8 @@ const Boardle = () => {
         </h3>
         <ul className="text-sm space-y-1" style={{ color: 'var(--umn-maroon-ink)' }}>
           <li>• Guess the 5-letter word in 6 tries</li>
-          <li>• <span style={{ backgroundColor: 'var(--umn-gold)', color: 'var(--umn-maroon)', padding: '2px 4px', borderRadius: '4px' }}>Gold</span> = Correct letter, correct position</li>
-          <li>• <span style={{ backgroundColor: 'var(--umn-maroon)', color: 'white', padding: '2px 4px', borderRadius: '4px' }}>Maroon</span> = Correct letter, wrong position</li>
+          <li>• <span style={{ backgroundColor: 'var(--umn-maroon)', color: 'white', padding: '2px 4px', borderRadius: '4px' }}>Maroon</span> = Correct letter, correct position</li>
+          <li>• <span style={{ backgroundColor: 'var(--umn-gold)', color: 'var(--umn-maroon)', padding: '2px 4px', borderRadius: '4px' }}>Gold</span> = Correct letter, wrong position</li>
           <li>• <span style={{ backgroundColor: '#374151', color: 'white', padding: '2px 4px', borderRadius: '4px' }}>Dark</span> = Letter not in word</li>
           <li>• Earn 6-1 points based on tries (1 point for attempting)</li>
         </ul>
