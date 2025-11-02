@@ -19,100 +19,72 @@ const Boardle = () => {
   const [pointsAwarded, setPointsAwarded] = useState(0);
   const [initialized, setInitialized] = useState(false);
   const [currentGuess, setCurrentGuess] = useState('');
-  
+  const [usedLetters, setUsedLetters] = useState({}); // Track letter states for keyboard
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
+
   // Reference for the input field
   const inputRef = useRef(null);
+
+  // Add desktop detection
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Memoize word lists for optimal performance
   const { VALID_GUESSES, TARGET_WORDS, isValidWord } = useMemo(() => {
     console.log('🔄 Calculating word lists...');
     
-    // Business & UMN specific words for target selection
+    // Business & UMN specific words for target selection - FIXED ARRAY
     const BUSINESS_WORDS = [
-    'RIGHT','PAPER','CYCLE','VALUE','ROBIN','THREE','OWNER','SWEET','PLAZA','NIGHT',
-    'UNITY','RAPID','FORUM','STATE','RURAL','SPORT','RANGE','LEVEL','TABLE','STYLE',
-    'MODEL','GRAND','TEXAS','GOALS','THEME','SPENT','BILLS','LIMIT','BOARD','ROUND',
-    'ORDER','EXACT','WORRY','MAKER','GLASS','NORTH','ERROR','CHART','CHIEF','RULES',
-    'BONDS','MEDIA','ROUTE','THANK','TRAIN','COSTS','EMAIL','BUYER','KNOWN','LEARN',
-    'FLOUR','BRIDGE','BRAND','SPEND','WOODS','STRIP','PROUD','DEALT','MONEY','CHAIN',
-    'SMART','TRUST','BREAD','GRAIN','STAFF','WAGES','BUILD','TRAIT','FINAL','SOLVE',
-    'SMILE','PIANO','PRINT','POINT','WOMEN','LOANS','MARCH','OFFER','PLACE','FORCE',
-    'SAVED','LASER','SIGNS','BONES','LOGOS','MALL','FRONT','DEBUT','TRUCK','WOULD',
-    'WROTE','SPEED','TWINS','FIELD','COUNT','PARKS','PLANS','THEFT','STEAM','ORDER',
-    'BRIEF','STONE','FORMS','PLATE','THIRD','FIXED','HOUSE','STEEL','GRANT','BRAND',
-    'TERMS','SHARE','PEACE','GRACE','UNDER','SCOPE','USAGE','NEVER','LEGAL','LARGE',
-    'DOING','ASSET','AUDIT','MORAL','BRAND','TEAMS','WORDS','CHAIR','GROUP','TEACH',
-    'OTHER','TWICE','READY','BILLS','MONTH','WATER','WHOLE','POWER','DREAM','ENTRY',
-    'GRADE','HAPPY','SIGHT','VITAL','TAXES','AWARD','SIXTH','FORMS','LUCKY','MAJOR',
-    'TASTE','BUYER','SPARE','NAMES','THANK','BOARD','MINNE','PRIME','FRAME','MAYOR',
-    'BRAND','LOCAL','AGENT','FUNDS','QUITE','SPACE','CHART','INDEX','TASKS','TIGHT',
-    'TEENS','QUICK','GIANT','MILLS','TRIED','STAKE','TEACH','MAKES','LEAVE','SCORE',
-    'FIXED','PAGES','GROUP','WHOSE','PHOTO','RIVER','LASER','EVENT','DRAFT','SHELF',
-    'BRAND','SKILL','GOPHER','NOTED','COVER','TOWER','RULES','MAJOR','IMAGE','COACH',
-    'COSTS','PHONE','PRINT','MAGIC','PRESS','UNITY','NEEDS','LAYER','TRAIN','PIECE',
-    'THANK','SPEND','STATE','PAPER','LIMIT','METAL','POINT','FLOUR','THICK','EMAIL',
-    'TRADE','FORCE','SCALE','WRITE','WORST','PLACE','ROUGH','SMALL','VALUE','AWARD',
-    'LOYAL','RADIO','LEGAL','SPEED','PLANE','QUIET','WHEEL','LOGOS','STONE','ORDER',
-    'SIXTY','THOSE','PLANS','MONEY','DOING','FIELD','TRIAL','BOOKS','WAGES','TRADE',
-    'GIVEN','MODEL','BRAND','POWER','TEAMS','SPEND','WORSE','CHAIR','PLAZA','BREAD',
-    'COUNT','GROUP','MINNE','OWNER','SOLVE','RIVER','TWINS','BOARD','TWIST','STOCK',
-    'COVER','SMART','RULES','STATE','COURT','FALLS','UNITY','LOANS','WOODS','ORDER',
-    'PLANS','GOALS','LAKES','MILLS','BILLS','BUYER','WORKS','BUILD','STAFF','LEGAL',
-    'SPEND','FOCUS','GROUP','BRAND','SMART','BANKS','PARKS','WORDS','SHOPS','CHAIN',
-    'PROFIT','BONES','SHOPS','STORE','SALES','GRAIN','TEACH','FALLS','BRAND','LAKES',
-    'TASKS','STOCK','CHAIN','WORKS','SHOPS','RANGE','JUDGE','DEALS','TEAMS','PRICE',
-    'BOARD','TWINS','SOLVE','SAVED','BASIC','SKILL','PLANS','GROUP','GRAND','VALUE',
-    'MONEY','TRADE','TWINS','SAINT','BRIDGE','BREAD','PAGES','STONE','MINNE','WORKS',
-    'BUYER','COURT','BRAND','TAXES','MAYOR','TERMS','TESTS','PLAZA','BRAND','MALL',
-    'GRADE','NORTH','BUILD','STAFF','WORDS','JUDGE','STATE','BANKS','FOCUS','BRAND',
-    'WOODS','RULES','PLANS','SOLVE','LEGAL','TRADE','SALES','SHOPS','SMART','ORDER',
-    'BONDS','JOBS','FUNDS','CHAIR','PAGES','GROUP','SPEND','MONEY','TASKS','NAMES',
-    'PRICE','GOALS','WORKS','TEAMS','BOARD','LAKES','BREAD','SAINT','BASIC','CHAIN',
-    'GRAND','PROFIT','STOCK','STONE','LOANS','AGENT','TWINS','RIVER','MINNE','VALUE',
-    'OWNER','COURT','FALLS','STAFF','LEGAL','SMART','STORE','STATE','TRADE','BUILD',
-    'SHOPS','FOCUS','RULES','BUYER','CHAIN','WOODS','BANKS','BRAND','BRIDGE','GRADE',
-    'FLOUR','JOBS','TERMS','TESTS','PLAZA','MALL','PAGES','BRAND','WORKS','TEACH'
+      'RIGHT','PAPER','CYCLE','VALUE','ROBIN','THREE','OWNER','SWEET','PLAZA','NIGHT',
+      'UNITY','RAPID','FORUM','STATE','RURAL','SPORT','RANGE','LEVEL','TABLE','STYLE',
+      'MODEL','GRAND','TEXAS','GOALS','THEME','SPENT','BILLS','LIMIT','BOARD','ROUND',
+      'ORDER','EXACT','WORRY','MAKER','GLASS','NORTH','ERROR','CHART','CHIEF','RULES',
+      'BONDS','MEDIA','ROUTE','THANK','TRAIN','COSTS','EMAIL','BUYER','KNOWN','LEARN',
+      'FLOUR','BRIDGE','BRAND','SPEND','WOODS','STRIP','PROUD','DEALT','MONEY','CHAIN',
+      'SMART','TRUST','BREAD','GRAIN','STAFF','WAGES','BUILD','TRAIT','FINAL','SOLVE',
+      'SMILE','PIANO','PRINT','POINT','WOMEN','LOANS','MARCH','OFFER','PLACE','FORCE',
+      'SAVED','LASER','SIGNS','BONES','LOGOS','FRONT','DEBUT','TRUCK','WOULD','WROTE',
+      'SPEED','TWINS','FIELD','COUNT','PARKS','PLANS','THEFT','STEAM','BRIEF','STONE',
+      'FORMS','PLATE','THIRD','FIXED','HOUSE','STEEL','GRANT','TERMS','SHARE','PEACE',
+      'GRACE','UNDER','SCOPE','USAGE','NEVER','LEGAL','LARGE','DOING','ASSET','AUDIT',
+      'MORAL','TEAMS','WORDS','CHAIR','GROUP','TEACH','OTHER','TWICE','READY','MONTH',
+      'WATER','WHOLE','POWER','DREAM','ENTRY','GRADE','HAPPY','SIGHT','VITAL','TAXES',
+      'AWARD','SIXTH','FORMS','LUCKY','MAJOR','TASTE','SPARE','NAMES','MINNE','PRIME',
+      'FRAME','MAYOR','LOCAL','AGENT','FUNDS','QUITE','SPACE','INDEX','TASKS','TIGHT',
+      'TEENS','QUICK','GIANT','MILLS','TRIED','STAKE','MAKES','LEAVE','SCORE','PAGES',
+      'WHOSE','PHOTO','RIVER','EVENT','DRAFT','SHELF','SKILL','NOTED','COVER','TOWER',
+      'IMAGE','COACH','PHONE','MAGIC','PRESS','NEEDS','LAYER','PIECE','METAL','THICK',
+      'TRADE'
     ];
 
-    // Common, recognizable 5-letter words for target selection (Wordle-style difficulty)
-    const COMMON_TARGET_WORDS = [
-    'FAULT','BRAVE','WILEY','CREAM','BRING','CIVIL','DOUBT','CLEAR','EARTH',
-    'GLASS','FRAME','BOUND','CLOUD','MEANT','CRASH','BREED','CLOSE','CARRY','NEWLY',
-    'BLOOD','OCCUR','CHAIR','FUNNY','BOOST','CRAZY','MOUTH','LYING','EIGHT','BROWN',
-    'MOVIE','BIRTH','BEGAN','DEATH','FORTH','CROWD','FRAUD','FAITH','CHINA','CHEAP',
-    'FAULT','COULD','AROSE','MOUSE','FLEET','BROAD','FIFTH','BLACK','BELOW','EVERY',
-    'GRAVE','CLICK','EXIST','CHARM','FLAME','BRIEF','FIFTY','GROWN','CLOSE','FLUID',
-    'EARLY','GRASS','CROSS','CRIME','CHEST','CHAOS','FULLY','BOOST','DYING',
-    'GREEN','CURVE','CATCH','BOUND','DOZEN','CRANE','CLOCK','ENTRY','GOING','FALSE',
-    'ELITE','GRAND','CHILD','BEARD','EARTH','EXTRA','HORSE','ENTRY','ENJOY','EARLY',
-    'EQUAL','ENEMY','FAULT','CRUDE','CHARM','HENRY','MARIA','DOING','COAST',
-    'FRANK','CROWN','CHINA','EVERY','BEACH','CABLE','BREAK','BENCH','CRAFT','BUILD',
-    'CARRY','FULLY','CLOSE','PLANT','BLAME','BLOOD','SMILE','FORTY','FAITH','FLASH',
-    'HENCE','GLASS','GUEST','BROWN','BREAD','DELAY','BIRTH','BOUND','DOZEN','CHILD',
-    'BROKE','DEALT','DRESS','BRAIN','CHAOS','EARLY','BLIND','CLEAN','CLOCK','BROAD',
-    'DROVE','MEANT','HEAVY','DANCE','EXACT','CIVIL','CHARM','BELOW','BENCH','ENTRY',
-    'MOVIE','FRESH','DOUBT','CRIME','ENTRY','HENRY','ENTRY','BOUND','BREED','EARTH',
-    'DRAMA','EARLY','BROWN','GREEN','GRASS','GROWN','GRAVE','BEGAN','CHAIR','FRUIT',
-    'BOOST','BREAD','CLOSE','BLOCK','EARLY','DOZEN','GOING','MOUSE','COULD','OFTEN'
-    ];
+    // Filter valid 5-letter words from the word list
+    const fiveLetterWords = words.filter(word => 
+      word.length === 5 && 
+      /^[a-zA-Z]+$/.test(word)
+    ).map(word => word.toUpperCase());
 
-    // Get ALL 5-letter words for guessing validation (keeps comprehensive guessing)
-    const fiveLetterWords = words
-      .filter(word => word.length === 5)
-      .map(word => word.toUpperCase());
-
-    // Target words: Business words + Common words only (NO obscure words!)
-    const targetWords = [
-      ...BUSINESS_WORDS,
-      ...COMMON_TARGET_WORDS.filter(word => !BUSINESS_WORDS.includes(word))
-    ].filter((word, index, self) => self.indexOf(word) === index); // Remove duplicates
-
-    // Create a Set for O(1) word validation (still allows all words for guessing)
+    // Create a Set for O(1) lookup performance
     const validWordSet = new Set(fiveLetterWords);
+
+    // Combine business words with common 5-letter words for target selection
+    const commonWords = fiveLetterWords.filter(word => 
+      !word.includes("'") && 
+      !/[^A-Z]/.test(word) &&
+      word.length === 5
+    ).slice(0, 1000); // Take first 1000 common words
+
+    const targetWords = [...new Set([...BUSINESS_WORDS, ...commonWords])];
+    
     const isValidWordFunc = (word) => validWordSet.has(word);
 
     console.log(`✅ Loaded ${fiveLetterWords.length} valid 5-letter words for guessing`);
-    console.log(`✅ Available ${targetWords.length} curated target words (no obscure words)`);
+    console.log(`✅ Available ${targetWords.length} curated target words`);
 
     return {
       VALID_GUESSES: fiveLetterWords,
@@ -196,6 +168,7 @@ const Boardle = () => {
 
       // Reconstruct the board
       const newBoard = Array(6).fill(null).map(() => Array(5).fill({ ch: '', state: '' }));
+      const newUsedLetters = {};
       
       guesses.forEach((guess, rowIndex) => {
         const word = guess.word;
@@ -203,15 +176,28 @@ const Boardle = () => {
         
         if (word && states && rowIndex < 6) {
           for (let i = 0; i < 5; i++) {
+            const letter = word[i];
+            const state = states[i];
+            
             newBoard[rowIndex][i] = {
-              ch: word[i] || '',
-              state: states[i] || ''
+              ch: letter || '',
+              state: state || ''
             };
+            
+            // Update used letters for keyboard
+            if (letter && state) {
+              if (!newUsedLetters[letter] || 
+                  (newUsedLetters[letter] === 'absent' && state !== 'absent') ||
+                  (newUsedLetters[letter] === 'present' && state === 'correct')) {
+                newUsedLetters[letter] = state;
+              }
+            }
           }
         }
       });
 
       setBoard(newBoard);
+      setUsedLetters(newUsedLetters);
       setCurrentRow(gameData.attempts);
       setCurrentCol(0);
       setGameOver(true);
@@ -274,7 +260,7 @@ const Boardle = () => {
     };
 
     initGame();
-  }, [session?.user?.id, TARGET_WORDS.length]); // Add TARGET_WORDS.length to ensure it's loaded
+  }, [session?.user?.id, TARGET_WORDS.length]);
 
   // Optimized input change handler
   const handleInputChange = (e) => {
@@ -349,6 +335,19 @@ const Boardle = () => {
     }
 
     setBoard(newBoard);
+
+    // Update used letters for virtual keyboard
+    const newUsedLetters = { ...usedLetters };
+    guessLetters.forEach((letter, index) => {
+      const state = newBoard[currentRow][index].state;
+      // Priority: correct > present > absent
+      if (!newUsedLetters[letter] || 
+          (newUsedLetters[letter] === 'absent' && state !== 'absent') ||
+          (newUsedLetters[letter] === 'present' && state === 'correct')) {
+        newUsedLetters[letter] = state;
+      }
+    });
+    setUsedLetters(newUsedLetters);
 
     // Store the guess for reconstruction later
     const letterStates = newBoard[currentRow].map(cell => cell.state);
@@ -476,7 +475,7 @@ const Boardle = () => {
         const rowText = row.map(cell => {
             switch (cell.state) {
             case 'correct': return '🟨'; // Using gold for correct (UMN colors)
-            case 'present': return '🟦'; // Using blue for present
+            case 'present': return '🟥'; // Using red for present
             case 'absent': return '⬛'; // Black for absent
             default: return '⬜'; // This shouldn't appear if row has content
             }
@@ -547,7 +546,7 @@ const Boardle = () => {
                   borderColor: cell.ch ? 'var(--umn-maroon)' : 'var(--line)',
                   backgroundColor: 
                     cell.state === 'correct' ? 'var(--umn-gold)' :
-                    cell.state === 'present' ? '#9CA3AF' :
+                    cell.state === 'present' ? 'var(--umn-maroon)' :
                     cell.state === 'absent' ? '#374151' :
                     'var(--panel)',
                   color: 
@@ -564,7 +563,98 @@ const Boardle = () => {
         ))}
       </div>
 
-      {/* Native Input Interface - Replaces Virtual Keyboard */}
+      {/* Virtual Keyboard - Desktop Only */}
+      {isDesktop && (
+        <div className="mb-6">
+          {/* First Row */}
+          <div className="flex justify-center gap-1 mb-2">
+            {['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'].map(letter => (
+              <div
+                key={letter}
+                className="w-10 h-12 rounded flex items-center justify-center text-sm font-bold border transition-all duration-200"
+                style={{
+                  backgroundColor: 
+                    usedLetters[letter] === 'correct' ? 'var(--umn-gold)' :
+                    usedLetters[letter] === 'present' ? 'var(--umn-maroon)' :
+                    usedLetters[letter] === 'absent' ? '#374151' :
+                    'var(--panel)',
+                  color: 
+                    usedLetters[letter] === 'correct' ? 'var(--umn-maroon)' :
+                    usedLetters[letter] === 'present' ? 'white' :
+                    usedLetters[letter] === 'absent' ? 'white' :
+                    'var(--umn-maroon)',
+                  borderColor: 
+                    usedLetters[letter] ? 'transparent' : 'var(--line)'
+                }}
+              >
+                {letter}
+              </div>
+            ))}
+          </div>
+          
+          {/* Second Row */}
+          <div className="flex justify-center gap-1 mb-2">
+            {['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'].map(letter => (
+              <div
+                key={letter}
+                className="w-10 h-12 rounded flex items-center justify-center text-sm font-bold border transition-all duration-200"
+                style={{
+                  backgroundColor: 
+                    usedLetters[letter] === 'correct' ? 'var(--umn-gold)' :
+                    usedLetters[letter] === 'present' ? 'var(--umn-maroon)' :
+                    usedLetters[letter] === 'absent' ? '#374151' :
+                    'var(--panel)',
+                  color: 
+                    usedLetters[letter] === 'correct' ? 'var(--umn-maroon)' :
+                    usedLetters[letter] === 'present' ? 'white' :
+                    usedLetters[letter] === 'absent' ? 'white' :
+                    'var(--umn-maroon)',
+                  borderColor: 
+                    usedLetters[letter] ? 'transparent' : 'var(--line)'
+                }}
+              >
+                {letter}
+              </div>
+            ))}
+          </div>
+          
+          {/* Third Row */}
+          <div className="flex justify-center gap-1">
+            {['Z', 'X', 'C', 'V', 'B', 'N', 'M'].map(letter => (
+              <div
+                key={letter}
+                className="w-10 h-12 rounded flex items-center justify-center text-sm font-bold border transition-all duration-200"
+                style={{
+                  backgroundColor: 
+                    usedLetters[letter] === 'correct' ? 'var(--umn-gold)' :
+                    usedLetters[letter] === 'present' ? 'var(--umn-maroon)' :
+                    usedLetters[letter] === 'absent' ? '#374151' :
+                    'var(--panel)',
+                  color: 
+                    usedLetters[letter] === 'correct' ? 'var(--umn-maroon)' :
+                    usedLetters[letter] === 'present' ? 'white' :
+                    usedLetters[letter] === 'absent' ? 'white' :
+                    'var(--umn-maroon)',
+                  borderColor: 
+                    usedLetters[letter] ? 'transparent' : 'var(--line)'
+                }}
+              >
+                {letter}
+              </div>
+            ))}
+          </div>
+          
+          {/* Keyboard Legend - Desktop Only */}
+          <div className="mt-4 text-center text-xs" style={{ color: 'var(--umn-maroon-ink)' }}>
+            Virtual keyboard shows letter states: 
+            <span style={{ backgroundColor: 'var(--umn-gold)', color: 'var(--umn-maroon)', padding: '1px 3px', borderRadius: '2px', margin: '0 2px' }}>Gold</span> = Correct, 
+            <span style={{ backgroundColor: 'var(--umn-maroon)', color: 'white', padding: '1px 3px', borderRadius: '2px', margin: '0 2px' }}>Maroon</span> = Wrong position, 
+            <span style={{ backgroundColor: '#374151', color: 'white', padding: '1px 3px', borderRadius: '2px', margin: '0 2px' }}>Dark</span> = Not in word
+          </div>
+        </div>
+      )}
+
+      {/* Native Input Interface */}
       {!hasPlayedToday && !gameOver && (
         <form onSubmit={handleSubmitGuess} className="space-y-4">
           <div className="text-center">
@@ -603,7 +693,7 @@ const Boardle = () => {
           </div>
           
           <div className="text-center text-sm" style={{ color: 'var(--umn-maroon-ink)' }}>
-            Type a 5-letter word and press Submit or Enter
+            {isDesktop ? 'Type a 5-letter word and press Submit or Enter' : 'Type a 5-letter word using your device keyboard'}
           </div>
         </form>
       )}
@@ -639,7 +729,7 @@ const Boardle = () => {
         <ul className="text-sm space-y-1" style={{ color: 'var(--umn-maroon-ink)' }}>
           <li>• Guess the 5-letter word in 6 tries</li>
           <li>• <span style={{ backgroundColor: 'var(--umn-gold)', color: 'var(--umn-maroon)', padding: '2px 4px', borderRadius: '4px' }}>Gold</span> = Correct letter, correct position</li>
-          <li>• <span style={{ backgroundColor: '#9CA3AF', color: 'white', padding: '2px 4px', borderRadius: '4px' }}>Gray</span> = Correct letter, wrong position</li>
+          <li>• <span style={{ backgroundColor: 'var(--umn-maroon)', color: 'white', padding: '2px 4px', borderRadius: '4px' }}>Maroon</span> = Correct letter, wrong position</li>
           <li>• <span style={{ backgroundColor: '#374151', color: 'white', padding: '2px 4px', borderRadius: '4px' }}>Dark</span> = Letter not in word</li>
           <li>• Earn 6-1 points based on tries (1 point for attempting)</li>
         </ul>

@@ -3,6 +3,7 @@ import { UserAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import Boardle from './Boardle';
+import MarketMover from './MarketMover';
 
 const Dashboard = () => {
   const { session, userProfile, signOut, fetchUserProfile } = UserAuth();
@@ -575,12 +576,9 @@ const Dashboard = () => {
                 </p>
               </div>
               {/* Block for an Update*/}
-              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--surface)' }}>
-                <p className="text-sm" style={{ color: 'var(--umn-maroon-ink)' }}>
-                  Join us for Wellness Week from October 27-30!
-                </p>
-              </div>
+
               {/* Enter new updates here */}
+              
             </div>
           </div>
           
@@ -676,6 +674,22 @@ const Dashboard = () => {
                 }}
               >
                 Boardle
+              </button>
+              <button
+                  onClick={() => {
+                    setActiveTab('market');
+                    if (isMobileMenuOpen) setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex-1 md:flex-none px-4 md:px-6 py-3 rounded-lg font-medium transition-colors duration-200 min-h-[44px] ${
+                    activeTab === 'market' ? 'text-white' : ''
+                  }`}
+                  style={{
+                    backgroundColor: activeTab === 'market' ? 'var(--umn-maroon)' : 'transparent',
+                    color: activeTab === 'market' ? 'white' : 'var(--umn-maroon)',
+                    border: `2px solid var(--umn-maroon)`
+                  }}
+                >
+                  Market Mover
               </button>
             </div>
           </div>
@@ -784,7 +798,11 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/*Wordle Tab */}
           {activeTab === 'wordle' && <Boardle />}
+          {/*Market Mover Tab */}
+          {activeTab === 'market' && <MarketMover />}
+        
         </main>
       </div>
     </div>
