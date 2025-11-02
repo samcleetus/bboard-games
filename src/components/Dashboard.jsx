@@ -3,7 +3,7 @@ import { UserAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import Boardle from './Boardle';
-import MarketMover from './MarketMover';
+// import MarketMover from './MarketMover';
 
 const Dashboard = () => {
   const { session, userProfile, signOut, fetchUserProfile } = UserAuth();
@@ -578,7 +578,7 @@ const Dashboard = () => {
               {/* Block for an Update*/}
 
               {/* Enter new updates here */}
-              
+
             </div>
           </div>
           
@@ -674,22 +674,6 @@ const Dashboard = () => {
                 }}
               >
                 Boardle
-              </button>
-              <button
-                  onClick={() => {
-                    setActiveTab('market');
-                    if (isMobileMenuOpen) setIsMobileMenuOpen(false);
-                  }}
-                  className={`flex-1 md:flex-none px-4 md:px-6 py-3 rounded-lg font-medium transition-colors duration-200 min-h-[44px] ${
-                    activeTab === 'market' ? 'text-white' : ''
-                  }`}
-                  style={{
-                    backgroundColor: activeTab === 'market' ? 'var(--umn-maroon)' : 'transparent',
-                    color: activeTab === 'market' ? 'white' : 'var(--umn-maroon)',
-                    border: `2px solid var(--umn-maroon)`
-                  }}
-                >
-                  Market Mover
               </button>
             </div>
           </div>
@@ -800,8 +784,6 @@ const Dashboard = () => {
 
           {/*Wordle Tab */}
           {activeTab === 'wordle' && <Boardle />}
-          {/*Market Mover Tab */}
-          {activeTab === 'market' && <MarketMover />}
         
         </main>
       </div>
