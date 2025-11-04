@@ -467,7 +467,7 @@ const Boardle = () => {
         if (hasContent) {
         const rowText = row.map(cell => {
             switch (cell.state) {
-            case 'correct': return '🟫'; // Changed: Brown/maroon for correct position
+            case 'correct': return '🟥'; // Changed: Red for correct position
             case 'present': return '🟨'; // Changed: Gold/yellow for wrong position  
             case 'absent': return '⬛'; // Black for absent
             default: return '⬜'; // This shouldn't appear if row has content
