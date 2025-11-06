@@ -39,56 +39,76 @@ const Boardle = () => {
   const { VALID_GUESSES, TARGET_WORDS, isValidWord } = useMemo(() => {
     console.log('🔄 Calculating word lists...');
     
-    // Business & UMN specific words for target selection - FIXED ARRAY
+    // Business & UMN specific words for target selection ONLY - shuffled for better randomness
     const BUSINESS_WORDS = [
-      'RIGHT','PAPER','CYCLE','VALUE','ROBIN','THREE','OWNER','SWEET','PLAZA','NIGHT',
-      'UNITY','RAPID','FORUM','STATE','RURAL','SPORT','RANGE','LEVEL','TABLE','STYLE',
-      'MODEL','GRAND','TEXAS','GOALS','THEME','SPENT','BILLS','LIMIT','BOARD','ROUND',
-      'ORDER','EXACT','WORRY','MAKER','GLASS','NORTH','ERROR','CHART','CHIEF','RULES',
-      'BONDS','MEDIA','ROUTE','THANK','TRAIN','COSTS','EMAIL','BUYER','KNOWN','LEARN',
-      'FLOUR','BRIDGE','BRAND','SPEND','WOODS','STRIP','PROUD','DEALT','MONEY','CHAIN',
-      'SMART','TRUST','BREAD','GRAIN','STAFF','WAGES','BUILD','TRAIT','FINAL','SOLVE',
-      'SMILE','PIANO','PRINT','POINT','WOMEN','LOANS','MARCH','OFFER','PLACE','FORCE',
-      'SAVED','LASER','SIGNS','BONES','LOGOS','FRONT','DEBUT','TRUCK','WOULD','WROTE',
-      'SPEED','TWINS','FIELD','COUNT','PARKS','PLANS','THEFT','STEAM','BRIEF','STONE',
-      'FORMS','PLATE','THIRD','FIXED','HOUSE','STEEL','GRANT','TERMS','SHARE','PEACE',
-      'GRACE','UNDER','SCOPE','USAGE','NEVER','LEGAL','LARGE','DOING','ASSET','AUDIT',
-      'MORAL','TEAMS','WORDS','CHAIR','GROUP','TEACH','OTHER','TWICE','READY','MONTH',
-      'WATER','WHOLE','POWER','DREAM','ENTRY','GRADE','HAPPY','SIGHT','VITAL','TAXES',
-      'AWARD','SIXTH','FORMS','LUCKY','MAJOR','TASTE','SPARE','NAMES','MINNE','PRIME',
-      'FRAME','MAYOR','LOCAL','AGENT','FUNDS','QUITE','SPACE','INDEX','TASKS','TIGHT',
-      'TEENS','QUICK','GIANT','MILLS','TRIED','STAKE','MAKES','LEAVE','SCORE','PAGES',
-      'WHOSE','PHOTO','RIVER','EVENT','DRAFT','SHELF','SKILL','NOTED','COVER','TOWER',
-      'IMAGE','COACH','PHONE','MAGIC','PRESS','NEEDS','LAYER','PIECE','METAL','THICK',
-      'TRADE'
+      'GROAN','FLINT','SOWER','CRAVE','NIFTY','PLUME','WRECK','FAINT','BRISK','LOAMY',
+      'OUNCE','GRIME','STASH','ADEPT','BISON','GLEAM','TRUCE','VAPOR','CRATE','HOLLY',
+      'QUEST','FUNKY','SPIKE','CELLO','AMBER','THORN','BLUSH','CHIME','DRIFT','RATIO',
+      'SPIRE','MAUVE','HUSHY','ORBIT','KNACK','LINGO','CORAL','FROND','CRISP','FLARE',
+      'ROGUE','FLAKE','MOSSY','GUILT','PATCH','LODGE','SMIRK','DIZZY','CREEK','VAULT',
+      'LINEN','GRIND','POLAR','FLORA','EPOCH','TUSKS','CHIRP','TOKEN','PORCH','MAPLE',
+      'TAMER','CLOWN','BROOK','GRAIN','FANCY','EMBER','PRAWN','CLINK','JOINT','RAMEN',
+      'IMPLY','OZONE','FLUNG','MANOR','CHIVE','CROWN','BOUND','SPRIG','INFER','HUMUS',
+      'CLOVE','SWARM','FLEET','TORCH','TAPER','INDEX','CLIMB','RINSE','DANDY','GLEAN',
+      'LATCH','SCORN','BLINK','PETAL','CLOUT','FROST','GLINT','PLUMP','PAINT','SOUND',
+      'FRISK','BLOOM','WHISK','CURVE','SPARE','GROPE','FLAME','CIVIC','TWIRL','BASTE',
+      'FLUME','SNARL','CRAFT','LACED','SLOPE','REEDY','SPAWN','LEAFY','LEVER','SCONE',
+      'SHEEP','GLAND','TRYST','HOARD','MOTTO','PEARL','PLUCK','GRAVE','STING','FLOCK',
+      'AMPLY','PERCH','GROIN','STEAD','VALOR','TRAIL','BUDGE','FUZZY','SPOUT','CARGO',
+      'SHELF','GROVE','GLIDE','FLAIR','PLIER','SCENT','MINTY','COAST','PIVOT','PRUNE',
+      'BLEAK','SCORE','PINCH','JOLLY','SWAMP','GRAPE','MILKY','CLOUD','VOUCH','HASTE',
+      'SLICK','BOAST','LUCID','CRUMB','DUSTY','MODAL','SPOIL','SHAFT','PLUMB','CHALK',
+      'SNORE','FLOAT','HINGE','BATON','FRAME','RIDGE','SYRUP','SPUNK','FLASH','MOIST',
+      'LUNGE','YEAST','PEACH','FLUKE','CHAIN','GHOST','FUDGE','CREAK','TRAWL','BRICK',
+      'PLANK','NOBLE','CIDER','SCALY','CHILL','TWIST','LURCH','FORGE','BLEND','CRAWL',
+      'STORM','BOOTH','FETCH','KNEEL','BLAZE','QUIRK','THYME','PRISM','DWELL','SPOKE',
+      'MIRTH','HONEY','REACH','TOWER','TANGO','CHORD','RHYME','SPICE','FOYER','SHORE',
+      'WRATH','CLASP','PRONE','FRUIT','SWEPT','POUCH','SHINY','BREAD','ANGEL','GUSTO',
+      'MOTEL','CRANE','SLUMP','WHIRL','DROOP','PITCH','SHOUT','PLAZA','CLEFT','VAPID',
+      'RAVEN','TREAT','SMOKE','GLARE','HUMID','TRUNK','THUMP','CREST','DROLL','CABLE',
+      'GLOBE','BRIDE','PROBE','KNAVE','PLANT','STEAM','POISE','DRONE','FABLE','CHART',
+      'PRONG','TWEAK','ROAST','PLAIN','CREAM','TIDAL','RUSTY','SWORN','CHINA','CURLY',
+      'FRONT','BRINE','TANGY','HURRY','STOIC','MIRTH','QUAIL','NERVE','APRON','SLICE',
+      'STONY','HOVER','CRONY','GRAZE','REBEL','FIERY','MIRTH','BEVEL','TWICE','SLOTH',
+      'FROWN','BRAVO','DWELT','WIDEN','CHALK','DROVE','TANGO','GROOM','PULSE','NAIVE',
+      'DUSKY','MERIT','SHARE','TOKEN','PATIO','VOWEL','PRISM','ELDER','FIBER','HOBBY',
+      'MOUND','TIDAL','KNOCK','CARGO','SPINE','VENOM','TULIP','DWARF','MIRTH','PENNY',
+      'FLUSH','MIDGE','STAIN','FAIRY','WOVEN','LATTE','TEARY','SPINY','CHESS','SCARF',
+      'ALBUM','RAZOR','MOUND','CRISP','STINT','VIRAL','MIDGE','BERRY','OASIS','FABLE',
+      'PLANT','ZEBRA','CHORD','SPINE','TULIP','LATCH','GRAZE','RAVEN','PLUMB','DWARF',
+      'TWEAK','THUMP','REBEL','GLOBE','ANGEL','MIRTH','FIERY','APRON','RAZOR','TANGO',
+      'CIDER','VAPID','LUNGE','PLIER','SMIRK','HONEY','MINTY','BROOK','PLUME','GROVE',
+      'TOKEN','TWIST','THORN','BISON','CHARM','TORCH','PLUSH','VAULT','CRAVE','MOSSY',
+      'GRAIN','CREEK','FANCY','DRIFT','ROGUE','GUILT','TWIRL','LINEN','SPARE','DIZZY',
+      'MAPLE','POLAR','GLEAN','BRISK','FLORA','AMBER','NIFTY','STASH','ADEPT','EPOCH',
+      'CHIRP','VOUCH','PRAWN','HOLLY','SOWER','KNACK','FLARE','SPUNK','TWIRL','CLOWN',
+      'TRUCE','VALOR','TRAIL','MIRTH','CARGO','BOOTH','YEAST','FRISK','TWIST','BLOOM',
+      'PLUME','BROOK','CRISP','DRIFT','ROGUE','MOSSY','GRAIN','CHARM','TORCH','PLUSH'
     ];
 
-    // Filter valid 5-letter words from the word list
+    // Filter valid 5-letter words from the package - ONLY for validating guesses
     const fiveLetterWords = words.filter(word => 
       word.length === 5 && 
       /^[a-zA-Z]+$/.test(word)
     ).map(word => word.toUpperCase());
 
-    // Create a Set for O(1) lookup performance
+    // Create a Set for O(1) lookup performance for guess validation
     const validWordSet = new Set(fiveLetterWords);
+    
+    // Add business words to valid guesses too (so they can be guessed)
+    BUSINESS_WORDS.forEach(word => validWordSet.add(word));
 
-    // Combine business words with common 5-letter words for target selection
-    const commonWords = fiveLetterWords.filter(word => 
-      !word.includes("'") && 
-      !/[^A-Z]/.test(word) &&
-      word.length === 5
-    ).slice(0, 1000); // Take first 1000 common words
-
-    const targetWords = [...new Set([...BUSINESS_WORDS, ...commonWords])];
+    // TARGET_WORDS is ONLY your curated business words
+    const targetWords = BUSINESS_WORDS;
     
     const isValidWordFunc = (word) => validWordSet.has(word);
 
     console.log(`✅ Loaded ${fiveLetterWords.length} valid 5-letter words for guessing`);
-    console.log(`✅ Available ${targetWords.length} curated target words`);
+    console.log(`✅ Available ${targetWords.length} curated BUSINESS words for targets`);
 
     return {
-      VALID_GUESSES: fiveLetterWords,
-      TARGET_WORDS: targetWords,
+      VALID_GUESSES: Array.from(validWordSet), // All valid English words + business words
+      TARGET_WORDS: targetWords, // ONLY your business words for daily targets
       isValidWord: isValidWordFunc
     };
   }, []); // Empty dependency array - only calculate once
@@ -127,16 +147,26 @@ const Boardle = () => {
     // Get today's date as YYYY-MM-DD in Central Time
     const dateString = getCentralTimeDate();
 
-    // Use a simple hash of the date string to get consistent results
+    // Use a more sophisticated hash function for better distribution
     let hash = 0;
+    const seed = 12345; // Add a seed for more randomness
+    
     for (let i = 0; i < dateString.length; i++) {
-        const char = dateString.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
+      const char = dateString.charCodeAt(i);
+      hash = ((hash << 5) - hash + char + seed) & 0xffffffff;
     }
+    
+    // Apply additional mixing to break patterns
+    hash = hash ^ (hash >>> 16);
+    hash = Math.imul(hash, 0x85ebca6b);
+    hash = hash ^ (hash >>> 13);
+    hash = Math.imul(hash, 0xc2b2ae35);
+    hash = hash ^ (hash >>> 16);
 
-    // Make sure hash is positive
+    // Make sure hash is positive and get word index
     const positiveHash = Math.abs(hash);
+    
+    // Use TARGET_WORDS which is now ONLY business words
     const wordIndex = positiveHash % TARGET_WORDS.length;
 
     console.log(`Central Time Date: ${dateString}, hash: ${hash}, wordIndex: ${wordIndex}, word: ${TARGET_WORDS[wordIndex]}`);
