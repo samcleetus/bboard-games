@@ -6,8 +6,13 @@ import words from 'an-array-of-english-words';
 const Boardle = () => {
   const { session, userProfile, fetchUserProfile } = UserAuth();
   
+  // Simple helper to generate a fresh empty board
+  const createEmptyBoard = () => Array.from({ length: 6 }, () =>
+    Array.from({ length: 5 }, () => ({ ch: '', state: '' }))
+  );
+  
   // Game state
-  const [board, setBoard] = useState(Array(6).fill(null).map(() => Array(5).fill({ ch: '', state: '' })));
+  const [board, setBoard] = useState(createEmptyBoard());
   const [currentRow, setCurrentRow] = useState(0);
   const [currentCol, setCurrentCol] = useState(0);
   const [gameOver, setGameOver] = useState(false);
@@ -142,6 +147,91 @@ const Boardle = () => {
     return `${year_ct}-${month}-${day}`;
   };
 
+  // Local persistence helpers to keep guesses when navigating away
+  const getProgressKey = (dateOverride) => {
+    if (!session?.user?.id) return null;
+    const dateString = dateOverride || getCentralTimeDate();
+    return `boardle-progress-${session.user.id}-${dateString}`;
+  };
+
+  const clearSavedProgress = (dateOverride) => {
+    const key = getProgressKey(dateOverride);
+    if (!key || typeof window === 'undefined') return;
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error('Error clearing Boardle progress:', error);
+    }
+  };
+
+  const saveProgress = (progress, dateOverride, todaysWord) => {
+    const key = getProgressKey(dateOverride);
+    if (!key || typeof window === 'undefined') return;
+
+    try {
+      localStorage.setItem(key, JSON.stringify({
+        ...progress,
+        targetWord: todaysWord || targetWord
+      }));
+    } catch (error) {
+      console.error('Error saving Boardle progress:', error);
+    }
+  };
+
+  const loadSavedProgress = (todaysWord, dateOverride) => {
+    const key = getProgressKey(dateOverride);
+    if (!key || typeof window === 'undefined') return null;
+
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+
+      const parsed = JSON.parse(raw);
+      if (parsed.targetWord !== todaysWord) {
+        localStorage.removeItem(key);
+        return null;
+      }
+
+      return parsed;
+    } catch (error) {
+      console.error('Error loading Boardle progress:', error);
+      return null;
+    }
+  };
+
+  const deriveUsedLetters = (boardState) => {
+    const derived = {};
+
+    boardState.forEach(row => {
+      row.forEach(cell => {
+        if (cell.ch && cell.state) {
+          if (!derived[cell.ch] || 
+              (derived[cell.ch] === 'absent' && cell.state !== 'absent') ||
+              (derived[cell.ch] === 'present' && cell.state === 'correct')) {
+            derived[cell.ch] = cell.state;
+          }
+        }
+      });
+    });
+
+    return derived;
+  };
+
+  const applySavedProgress = (savedProgress) => {
+    if (!savedProgress) return;
+
+    const safeBoard = Array.isArray(savedProgress.board) ? savedProgress.board : createEmptyBoard();
+    const savedUsedLetters = savedProgress.usedLetters || deriveUsedLetters(safeBoard);
+
+    setBoard(safeBoard);
+    setCurrentRow(savedProgress.currentRow || 0);
+    setCurrentCol(savedProgress.currentCol || 0);
+    setCurrentGuess(savedProgress.currentGuess || '');
+    setUsedLetters(savedUsedLetters);
+    setGameOver(savedProgress.gameOver || false);
+    setIsWinner(savedProgress.isWinner || false);
+  };
+
   // Get today's word - ensures ALL users get the same word
   const getTodaysWord = () => {
     // Get today's date as YYYY-MM-DD in Central Time
@@ -197,7 +287,7 @@ const Boardle = () => {
       }
 
       // Reconstruct the board
-      const newBoard = Array(6).fill(null).map(() => Array(5).fill({ ch: '', state: '' }));
+      const newBoard = createEmptyBoard();
       const newUsedLetters = {};
       
       guesses.forEach((guess, rowIndex) => {
@@ -273,12 +363,26 @@ const Boardle = () => {
         if (gameData) {
           // User has played today
           setHasPlayedToday(true);
+          clearSavedProgress(today);
           await reconstructBoardFromGameData(gameData);
         } else {
           // Fresh game
           setHasPlayedToday(false);
           setGameOver(false);
           setMessage('');
+
+          // Restore any in-progress game from local storage
+          const savedProgress = loadSavedProgress(todaysWord, today);
+          if (savedProgress) {
+            applySavedProgress(savedProgress);
+          } else {
+            setBoard(createEmptyBoard());
+            setCurrentRow(0);
+            setCurrentCol(0);
+            setCurrentGuess('');
+            setUsedLetters({});
+            setIsWinner(false);
+          }
         }
         
         setInitialized(true);
@@ -320,6 +424,38 @@ const Boardle = () => {
       setBoard(newBoard);
     }
   }, [currentGuess, currentRow, gameOver, hasPlayedToday]);
+
+  // Persist progress locally so navigation doesn't reset guesses
+  useEffect(() => {
+    if (!initialized || loading) return;
+    if (hasPlayedToday || gameOver) return;
+    if (!session?.user?.id || !targetWord) return;
+
+    const hasLetters = board.some(row => row.some(cell => cell.ch));
+    if (!hasLetters) return;
+
+    saveProgress({
+      board,
+      currentRow,
+      currentCol,
+      currentGuess,
+      usedLetters,
+      gameOver: false,
+      isWinner: false
+    });
+  }, [
+    board,
+    currentRow,
+    currentCol,
+    currentGuess,
+    usedLetters,
+    hasPlayedToday,
+    gameOver,
+    initialized,
+    loading,
+    session?.user?.id,
+    targetWord
+  ]);
 
   // Handle form submission with optimized word validation
   const handleSubmitGuess = async (e) => {
@@ -474,6 +610,7 @@ const Boardle = () => {
 
       setPointsAwarded(points);
       setHasPlayedToday(true);
+      clearSavedProgress(today);
       // Refresh user profile
       fetchUserProfile(session.user.id);
 
